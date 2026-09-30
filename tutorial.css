@@ -1,0 +1,36 @@
+/* The guide floats above the scene without intercepting clicks on its target. */
+.tutorial-launch { min-height: 44px; padding: 8px 16px; font: inherit; }
+body > .tutorial-launch { position: fixed; left: 24px; bottom: 24px; z-index: 7; border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 2px 4px #232d4b08, 0 8px 24px #232d4b16; }
+body.coordinate-open > .tutorial-launch { display: none; }
+.tutorial-overlay { position: fixed; inset: 0; z-index: 100; pointer-events: none; }
+.tutorial-overlay[hidden] { display: none; }
+.tutorial-ring { position: fixed; border: 3px solid var(--accent); border-radius: 16px; box-sizing: border-box; box-shadow: 0 0 0 3px #e5720018, 0 8px 28px #232d4b20; }
+.tutorial-ring::after { content: ''; position: absolute; inset: -4px; border: 1px solid #e5720070; border-radius: inherit; }
+.tutorial-bubble { position: fixed; width: min(340px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); display: flex; flex-direction: column; overflow: hidden; overscroll-behavior: contain; pointer-events: auto; box-sizing: border-box; padding: 20px; border: 1px solid var(--border); border-radius: 28px; background: var(--surface); color: var(--text); box-shadow: 0 2px 4px #232d4b08, 0 16px 48px #232d4b24; font: 16px/1.5 "Viewer Comic", cursive; }
+.tutorial-bubble h2 { margin: 8px 0; color: var(--title); font: 600 20px/1.3 "Viewer Comic", cursive; }
+.tutorial-bubble p { margin: 8px 0 16px; font: inherit; }
+.tutorial-copy { min-height: 0; overflow-y: auto; overflow-wrap: anywhere; overscroll-behavior: contain; }
+.tutorial-top, .tutorial-controls { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.tutorial-controls { padding-top: 4px; }
+.tutorial-bubble button { min-width: 44px; min-height: 44px; padding: 8px 12px; font: inherit; border: 1px solid var(--border); border-radius: 12px; color: var(--title); background: var(--surface); cursor: pointer; }
+.tutorial-bubble button:disabled { opacity: .5; cursor: default; }
+.tutorial-bubble button[data-next] { background: var(--title); color: white; }
+.tutorial-bubble button:active, .tutorial-launch:active { scale: .96; }
+.tutorial-bubble button:focus-visible, .tutorial-launch:focus-visible { outline: 2px solid var(--title); outline-offset: 3px; }
+#coordinate-training p { white-space: pre-line; }
+@media (prefers-reduced-motion: no-preference) {
+  .tutorial-ring { transition: left 450ms cubic-bezier(.2,0,0,1), top 450ms cubic-bezier(.2,0,0,1), width 450ms cubic-bezier(.2,0,0,1), height 450ms cubic-bezier(.2,0,0,1), border-radius 450ms cubic-bezier(.2,0,0,1); }
+  .tutorial-bubble { transition: left 450ms cubic-bezier(.2,0,0,1), top 450ms cubic-bezier(.2,0,0,1); }
+  .tutorial-bubble button, .tutorial-launch { transition: scale 150ms, box-shadow 150ms, background-color 150ms; }
+}
+@media (hover:hover) {
+  .tutorial-bubble button:hover, .tutorial-launch:hover { box-shadow: 0 4px 14px #232d4b24; }
+}
+@media (max-width: 700px) {
+  body > .tutorial-launch { left: 12px; bottom: 12px; padding: 8px 12px; }
+  .tutorial-bubble { padding: 16px; border-radius: 24px; }
+}
+/* Keep the mobile explanation at its content height instead of a tiny nested scroller. */
+@media (max-width: 900px) {
+  #coordinate-view .coordinate-explanation { height: max-content; min-height: max-content; overflow: visible; }
+}

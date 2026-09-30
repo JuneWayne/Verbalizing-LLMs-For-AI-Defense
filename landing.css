@@ -1,0 +1,94 @@
+@font-face { font-family: "Viewer Comic"; src: local("Comic Sans MS"), url("./fonts/ComicRelief-Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Viewer Comic"; src: local("Comic Sans MS Bold"), url("./fonts/ComicRelief-Bold.woff2") format("woff2"); font-weight: 600 900; font-display: swap; }
+:root { font-family: "Viewer Comic", "Comic Sans MS", cursive; color: #3c3b32; background: #f7f1de; color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100dvh; background: radial-gradient(ellipse at 50% 35%, #fffaf0, #f7f1de 75%); }
+button, select, a { -webkit-tap-highlight-color: transparent; }
+button, select { font: inherit; color: inherit; }
+button { cursor: pointer; min-height: 44px; border: 1px solid #d8c9a866; border-radius: 28px; background: #fff8e999; padding: 10px 22px; font-size: 16px; box-shadow: 0 1px 2px #00000008; transition: box-shadow 150ms ease-out, background-color 150ms ease-out; }
+button:hover { background: #fff9ec; box-shadow: 0 0 0 1px #0000000d, 0 4px 10px #0000000c, 0 10px 24px #0000000a; }
+button:active { scale: .96; }
+:focus-visible { outline: 2px solid #816020; outline-offset: 4px; }
+header { position: fixed; inset: 26px 32px auto; display: flex; align-items: center; justify-content: space-between; gap: 20px; z-index: 3; pointer-events: none; }
+header > * { pointer-events: auto; }
+.brand { font-size: clamp(22px, 2.5vw, 36px); color: inherit; text-decoration: none; }
+.model-heading { position: fixed; inset: 80px 20px auto; text-align: center; pointer-events: none; z-index: 2; }
+h1 { font-size: clamp(26px, 3.8vw, 48px); font-weight: 400; margin: 0 0 6px; }
+.model-heading p { font-size: 20px; margin: 0; color: #6e695a; }
+#architecture { position: fixed; inset: 0; touch-action: pan-y; }
+#architecture canvas { display: block; }
+.architecture-labels { position: absolute; inset: 0; pointer-events: none; }
+
+
+
+
+
+.model-dock { position: fixed; bottom: 26px; inset-inline: 16px; z-index: 3; text-align: center; pointer-events: none; }
+.model-dock nav { display: inline-flex; gap: 10px; align-items: center; padding: 10px; border-radius: 40px; border: 1px solid #fffdf4; background: #fff7e6c9; box-shadow: 0 2px 4px #00000006, 0 12px 36px #76634413; backdrop-filter: blur(14px); pointer-events: auto; }
+#model-picker { min-width: 160px; background: transparent; border-color: transparent; }
+#previous-model, #next-model { width: 48px; font-size: 28px; padding: 0; background: transparent; border-color: transparent; }
+#load-error { position: fixed; top: 45%; inset-inline: 20px; text-align: center; background: #fff9ed; padding: 20px; z-index: 5; }
+dialog { width: min(520px, calc(100vw - 32px)); max-height: calc(100dvh - 40px); overflow: auto; border: 1px solid #e4d6bd; border-radius: 24px; background: #fff8e9; color: inherit; padding: 24px; box-shadow: 0 20px 80px #665c4026; }
+dialog::backdrop { background: #f5eedbcc; backdrop-filter: blur(8px); }
+.dialog-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; }
+h2 { font-size: 23px; font-weight: 400; margin: 0; }
+#close-models { padding: 0; width: 44px; font-size: 24px; }
+#model-list { display: grid; gap: 12px; }
+.model-option { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; text-align: start; border-radius: 14px; padding: 14px; }
+.model-option small { font-size: 12px; color: #736b59; }
+.model-option[aria-current="true"] { background: #f7e3b7; border-color: #d0ad65; }
+.skip-link { position: fixed; top: -80px; inset-inline-start: 12px; z-index: 10; padding: 12px; background: #fff8e9; color: inherit; }
+.skip-link:focus { top: 12px; }
+[hidden] { display: none !important; }
+@media (max-width: 650px) {
+  header { inset: 16px 16px auto; gap: 12px; }
+  .brand { font-size: 20px; }
+  #choose-model { padding: 8px 12px; font-size: 13px; }
+  .model-heading { top: 90px; }
+  .model-heading p { font-size: 16px; }
+  
+  .model-dock { bottom: 55px; }
+  .model-dock nav { gap: 2px; padding: 8px; max-width: 100%; flex-wrap: wrap; justify-content: center; }
+  #model-picker { min-width: 0; max-width: calc(100vw - 160px); padding-inline: 10px; font-size: 14px; }
+  
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } button:active { scale: none; } }
+
+
+/* The model picker fills the scene; component inspection stays in viewer.html. */
+body { overflow: hidden; }
+header { z-index: 5; }
+.brand { font-weight: 700; }
+#architecture { touch-action: none; }
+.model-heading { top: auto; bottom: 152px; }
+.model-heading h1 { font-size: clamp(25px, 3vw, 42px); margin-bottom: 4px; }
+.model-heading p { font-size: 16px; }
+#model-detail { margin-top: 5px; font-size: 14px; }
+.legend { position: fixed; inset: 90px 30px auto; display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; font-size: 13px; pointer-events: none; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend span::before { content: ""; width: 12px; height: 12px; border-radius: 3px; background: #779a79; box-shadow: inset 0 1px 2px #ffffff80; }
+.legend .mlp::before { background: #7da9c6; }
+.legend .norm::before { background: #dfcfaa; }
+.legend .full::before { background: #d8a650; }
+#model-labels { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.orbit-label { position: absolute; top: 0; left: 0; pointer-events: auto; white-space: nowrap; padding: 8px 12px; font-size: 14px; background: #fff8e977; border: 0; box-shadow: none; }
+.orbit-label:active { scale: none; }
+button { transition: box-shadow 150ms ease-out, background-color 150ms ease-out, scale 150ms ease-out; }
+.model-dock { bottom: 22px; }
+.model-dock nav { gap: 12px; }
+@media (max-width: 650px) {
+  .legend { inset: 80px 16px auto; gap: 8px 16px; font-size: 11px; }
+  .model-heading { top: auto; bottom: 235px; }
+  .model-heading p { font-size: 14px; }
+  #model-detail { font-size: 12px; }
+  .model-dock { bottom: 48px; }
+  .model-dock nav { gap: 5px; }
+  .orbit-label { font-size: 11px; padding: 6px; }
+}
+@media (max-height: 650px) and (min-width: 651px) {
+  header { inset-block-start: 12px; }
+  .legend { top: 68px; }
+  .model-heading { bottom: 125px; }
+  .model-heading h1 { font-size: 24px; }
+  .model-dock { bottom: 8px; }
+}

@@ -1,0 +1,53 @@
+/* Palette from https://sig-uva.github.io/; logit colors retain their data meaning. */
+:root {
+  --page: #eff2f6;
+  --page-glow: #eff2f6;
+  --surface: #ffffff;
+  --text: #131a2b;
+  --title: #232d4b;
+  --muted: #53627a;
+  --border: #c5cedf;
+  --accent: #e57200;
+  --accent-soft: #fce5cf;
+  --action: #232d4b;
+  color: var(--text);
+  background: var(--page);
+}
+body, #coordinate-view { background: var(--page); }
+h1, h2, h3, .brand, .subtitle, .stack-title, .component-label, .coordinate-heading, .model-heading p { color: var(--title); }
+button, select, dialog, .skip-link { border-color: var(--border); background-color: var(--surface); }
+:focus-visible { outline-color: var(--accent); }
+.model-dock nav { background: #ffffffe0; border-color: #ffffff; box-shadow: 0 2px 4px #232d4b08, 0 12px 36px #232d4b12; }
+.orbit-label { background: #eff2f6d9; color: var(--title); }
+.model-option small { color: var(--muted); }
+.model-option[aria-current="true"], .strategy-switch input:checked + span { background: var(--accent-soft); border-color: var(--accent); }
+button:hover, .coordinate-stage:hover { background-color: var(--accent-soft); }
+.text-button, #scene-message, .scene-link, .view-detail .scene-actions, .coordinate-stage { background-color: var(--page); }
+dialog::backdrop { background: #eff2f6b8; }
+#load-error { background: var(--surface); }
+.coordinate-stage[aria-current="true"] { outline: 2px solid var(--accent); outline-offset: 2px; }
+.value-callout {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  padding: 9px 12px;
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--title);
+  box-shadow: 0 5px 20px #232d4b1c;
+  font: 16px/1.4 var(--font-ui, "Viewer Comic"), cursive;
+  font-variant-numeric: tabular-nums;
+  white-space: pre;
+}
+/* Projected number hit areas must never move or paint over the solid. */
+#coordinate-view .coordinate-tile:hover, #coordinate-view .coordinate-tile:focus-visible, #coordinate-view .coordinate-tile:active { background: transparent; }
+
+.legend .norm::before { background: #d6e1ef; }
+.legend .full::before { background: #8f91bc; }
+
+/* Leave a clear label slot above the solids on narrow screens. */
+@media (max-width: 677px) {
+  #coordinate-view { grid-template-rows: auto minmax(840px, 1fr) auto; }
+  .coordinate-canvas { min-height: 840px; }
+}

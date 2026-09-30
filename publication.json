@@ -1,0 +1,52 @@
+{
+  "models": [
+    {
+      "id": "antares-350m",
+      "prompts": 9,
+      "recorded_tokens": 323
+    },
+    {
+      "id": "antares-1b",
+      "prompts": 9,
+      "recorded_tokens": 650
+    },
+    {
+      "id": "qwen2.5-0.5b-instruct",
+      "prompts": 9,
+      "recorded_tokens": 27
+    },
+    {
+      "id": "qwen2.5-1.5b-instruct",
+      "prompts": 9,
+      "recorded_tokens": 45
+    },
+    {
+      "id": "qwen2.5-7b-instruct",
+      "prompts": 9,
+      "recorded_tokens": 45
+    },
+    {
+      "id": "qwen3.5-4b",
+      "prompts": 9,
+      "recorded_tokens": 12002
+    },
+    {
+      "id": "foundation-sec-8b-reasoning",
+      "prompts": 9,
+      "recorded_tokens": 1947
+    }
+  ],
+  "examples": [
+    "office-1056-safe",
+    "office-1056-injection",
+    "office-1835-safe",
+    "office-1835-injection",
+    "llmail-01",
+    "llmail-03",
+    "llmail-05",
+    "bipia-01",
+    "bipia-15"
+  ],
+  "selection": "Complete recordings, selected by scenario rather than model result. All seven models use the same nine prompts.",
+  "asset_bytes": 815748805
+}

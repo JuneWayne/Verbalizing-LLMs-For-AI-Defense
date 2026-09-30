@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#eff2f6">
+  <title>Inside the models</title>
+  <link rel="stylesheet" href="./landing.css?v=selected-value-17">
+  <link rel="stylesheet" href="./theme.css?v=selected-value-17">
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>
+  <link rel="stylesheet" href="./tutorial.css?v=tour-card-32">
+</head>
+<body>
+  <a class="skip-link" href="#model-picker">Choose a model</a>
+  <header>
+    <a class="brand" href="./index.html">Inside the models</a>
+    <button id="choose-model" aria-haspopup="dialog">Choose model</button>
+  </header>
+  <main>
+    <div id="architecture" role="region" aria-label="Model carousel. Use left and right arrows to choose a model, then Enter to open its recordings." tabindex="0"></div>
+    <div id="model-labels"></div>
+    <div class="legend" aria-label="Architecture colors"><span class="attention">Attention</span><span class="mlp">MLP</span><span class="norm">Normalization</span><span class="full">Full attention in Qwen3.5</span></div>
+    <section class="model-heading" aria-live="polite" aria-atomic="true">
+      <h1 id="model-title">Inside the models</h1>
+      <p id="model-size"></p>
+      <p id="model-detail"></p>
+    </section>
+    <div class="model-dock">
+      <nav aria-label="Model selection">
+        <button id="previous-model" aria-label="Previous model">‹</button>
+        <button id="model-picker" aria-haspopup="dialog">Loading models</button>
+        <button id="next-model" aria-label="Next model">›</button>
+      </nav>
+    </div>
+    <p id="load-error" role="alert" hidden></p>
+  </main>
+  <dialog id="model-dialog" aria-labelledby="model-dialog-title">
+    <div class="dialog-heading"><h2 id="model-dialog-title">Choose a model</h2><button id="close-models" aria-label="Close model selection">×</button></div>
+    <div id="model-list"></div>
+  </dialog>
+  <noscript>This viewer needs JavaScript. <a href="./viewer.html">Open Antares recordings</a>.</noscript>
+  <script type="module">import('./landing.js?v=tour-fit-31').catch(() => {const error=document.getElementById('load-error');error.hidden=false;error.textContent='The models could not load. Refresh to try again.';});</script>
+  <script type="module" src="./tutorial.js?v=tour-card-32"></script>
+</body>
+</html>
