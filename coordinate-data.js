@@ -1,4 +1,4 @@
-import { blockTitles, vectorValueNames, formatProbability } from './block-labels.js?v=plain-math-29';
+import { blockTitles, vectorValueNames, formatProbability } from './block-labels.js?v=transformer-terms-34';
 // Calculations use saved values only. A displayed window is never treated as a full sum.
 export function coordinateData(frame, weights, strategy, layer, method, key) {
   const row = method === 'jlens' ? frame.jlens[strategy][layer] : frame.logit_lens[layer];
@@ -14,8 +14,8 @@ export function coordinateData(frame, weights, strategy, layer, method, key) {
         const weight = this.values[i][j], input = this.input[j];
         return { value: weight, input, output: this.output[i], contribution: weight * input,
           equation: `${fmt(weight)} × ${fmt(input)} ≈ ${fmt(weight * input)}`,
-          meaning: `Matrix value [${i}, ${j}] multiplies hidden state value ${j}. Their product, ${fmt(weight * input)}, is one number in the sum for estimated hidden state value ${i}.`,
-          total: `Row ${i} contains ${size.toLocaleString()} matrix values. Multiply each by the matching hidden state value and add all ${size.toLocaleString()} multiplication results. This estimates hidden state value ${i}: ${fmt(this.output[i])}.` };
+          meaning: `Matrix value [${i}, ${j}] multiplies hidden state value ${j}. Their product, ${fmt(weight * input)}, is one number in the sum for estimated final hidden state value ${i}.`,
+          total: `Row ${i} contains ${size.toLocaleString()} matrix values. Multiply each by the matching hidden state value and add all ${size.toLocaleString()} multiplication results. This estimates final hidden state value ${i}: ${fmt(this.output[i])}.` };
       }
     };
   }
@@ -30,8 +30,8 @@ export function coordinateData(frame, weights, strategy, layer, method, key) {
         const weight = this.values[i][j], input = this.input[j], contribution = weight * input / weights.logits_scaling;
         return { value: weight, input, output: this.output[i], contribution,
           equation: `${fmt(weight)} × ${fmt(input)}${weights.logits_scaling === 1 ? '' : ' ÷ ' + weights.logits_scaling} ≈ ${fmt(contribution)}`,
-          meaning: `For ${JSON.stringify(this.names[i])}, multiply normalized hidden state value ${j} by the vocabulary weight in column ${j}${weights.logits_scaling === 1 ? '' : ', then divide by ' + weights.logits_scaling}. The result, ${fmt(contribution)}, is one of the numbers added to calculate this token’s score.`,
-          total: `The normalized hidden state has ${size.toLocaleString()} values. Multiply each by its matching weight in this token’s row and add all ${size.toLocaleString()} results${weights.logits_scaling === 1 ? '' : ', then divide by ' + weights.logits_scaling}. The saved calculation gives a token score of ${fmt(this.output[i])}.` };
+          meaning: `For ${JSON.stringify(this.names[i])}, multiply normalized hidden state value ${j} by the unembedding matrix weight in column ${j}${weights.logits_scaling === 1 ? '' : ', then divide by ' + weights.logits_scaling}. The result, ${fmt(contribution)}, is one of the numbers added to calculate this token’s logit.`,
+          total: `The normalized hidden state has ${size.toLocaleString()} values. Multiply each by its matching weight in this token’s row and add all ${size.toLocaleString()} results${weights.logits_scaling === 1 ? '' : ', then divide by ' + weights.logits_scaling}. The saved calculation gives a logit of ${fmt(this.output[i])}.` };
       }
     };
   }
@@ -42,7 +42,7 @@ export function coordinateData(frame, weights, strategy, layer, method, key) {
     hidden: 'One hidden state value after the layer adds its attention and MLP updates.',
     attention: 'This value is part of the attention output vector, which carries combined information from the tokens processed so far.',
     mlp: '',
-    transformed: 'One estimated hidden state value from the Jacobian applied to the full hidden state vector.',
+    transformed: 'One estimated final hidden state value from the Jacobian applied to the full hidden state vector.',
     normalized: '',
     logits: 'A vocabulary score. A larger score makes this token more likely.',
     softmax: 'The probability assigned to this token in the full vocabulary distribution.'

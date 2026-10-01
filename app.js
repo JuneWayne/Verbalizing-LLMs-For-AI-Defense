@@ -1,8 +1,8 @@
-import { formatProbability } from './block-labels.js?v=tour-30';
-import { modelSummary } from './model-copy.js?v=plain-math-29';
+import { formatProbability } from './block-labels.js?v=transformer-terms-34';
+import { modelSummary } from './model-copy.js?v=transformer-terms-34';
 import { createFrameLoader } from './frame-loader.js?v=seek-replay-24';
-import { createCoordinateView } from './coordinate-view.js?v=tour-fit-31';
-import { createScene } from './scene.js?v=tour-fit-31';
+import { createCoordinateView } from './coordinate-view.js?v=transformer-terms-34';
+import { createScene } from './scene.js?v=transformer-terms-34';
 
 const ui = Object.fromEntries([...document.querySelectorAll('[id]')].map(element => [element.id, element]));
 const modelResponse = await fetch('./models.json', {cache: 'no-store'});

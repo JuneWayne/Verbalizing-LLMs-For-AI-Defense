@@ -17,7 +17,7 @@ export function modelSummary(model) {
     scaling: model.residualMultiplier === 1
       ? 'Attention and MLP outputs are added back to the hidden state without extra scaling. Token scores also have no extra division before softmax.'
       : `Each attention and MLP output is multiplied by ${model.residualMultiplier} before being added back to the hidden state. The final token scores are divided by ${model.logitsScaling} before softmax. Both lenses use that same token-score division.`,
-    vocabulary: `Softmax compares ${model.vocabSize.toLocaleString()} vocabulary tokens. ${model.tiedEmbeddings ? 'The same weights are used to embed input tokens and to score output tokens.' : 'Input token embeddings and output vocabulary weights are separate learned matrices.'}`,
+    vocabulary: `Softmax compares ${model.vocabSize.toLocaleString()} vocabulary tokens. ${model.tiedEmbeddings ? 'The same weights are used to embed input tokens and to score output tokens.' : 'The input embedding matrix and output unembedding matrix are separate learned matrices.'}`,
     layers: `The stacks show ${model.recordedLayers.length} recorded layers, numbered ${model.recordedLayers[0]} to ${model.recordedLayers.at(-1)}. The model’s final layer is layer ${model.layers - 1}. Its actual next-token scores are under Full response.`
   };
 }

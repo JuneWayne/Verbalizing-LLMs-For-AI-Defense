@@ -1,5 +1,5 @@
 import { tutorialBounds } from './tutorial-bounds.js?v=tour-fit-31';
-import { modelSummary } from './model-copy.js?v=plain-math-29';
+import { modelSummary } from './model-copy.js?v=transformer-terms-34';
 import * as THREE from 'three';
 import { theme } from './theme.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';

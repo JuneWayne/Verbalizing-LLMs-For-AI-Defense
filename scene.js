@@ -1,5 +1,5 @@
 import { tutorialBounds } from './tutorial-bounds.js?v=tour-fit-31';
-import { blockTitles, formatProbability } from './block-labels.js?v=plain-math-29';
+import { blockTitles, formatProbability } from './block-labels.js?v=transformer-terms-34';
 import * as THREE from 'three';
 import { createBlockHover } from './block-hover.js?v=selected-value-17';
 import { createFlowWire } from './flow-wire.js?v=value-flow-13';

@@ -4,8 +4,8 @@ import { theme } from './theme.js';
 import { createBlockHover } from './block-hover.js?v=selected-value-17';
 import { createFlowWire } from './flow-wire.js?v=value-flow-13';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-import { coordinateData } from './coordinate-data.js?v=plain-math-29';
-import { blockTitles, describeBlock, vectorValueNames, formatProbability, tokenProbabilityLabel, blockTrainingDescriptions } from './block-labels.js?v=tour-30';
+import { coordinateData } from './coordinate-data.js?v=transformer-terms-34';
+import { blockTitles, describeBlock, vectorValueNames, formatProbability, tokenProbabilityLabel, blockTrainingDescriptions } from './block-labels.js?v=transformer-terms-34';
 
 // The original layer meshes move into this camera view and return unchanged on close.
 export function createCoordinateView(host, onClose) {
