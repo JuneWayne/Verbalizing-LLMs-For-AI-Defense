@@ -8,6 +8,11 @@ import { advanceSpring, nearestSlot } from './carousel-motion.js';
 import { createBlockHover } from './block-hover.js?v=selected-value-17';
 
 const ui = Object.fromEntries([...document.querySelectorAll('[id]')].map(element => [element.id, element]));
+// Keep the architecture legend below the title as it wraps on smaller screens.
+const titleObserver = new ResizeObserver(() => {
+  document.querySelector('.legend').style.top = (document.querySelector('header').getBoundingClientRect().bottom + 16) + 'px';
+});
+titleObserver.observe(document.querySelector('header'));
 const response = await fetch('./models.json?v=plain-math-29');
 if (!response.ok) throw new Error('Model metadata unavailable');
 const models = await response.json();

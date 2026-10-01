@@ -111,6 +111,7 @@ async function selectLayer(index, kind = selectedKind, classification = true) {
   if (classification && await showClassification() === false) return;
   if (request !== requestNumber) return;
   expanded = true;
+  ui['back-to-layers'].textContent = 'Back to layers';
   ui.layer.value = selected;
   view.setExpanded(true, selected, kind);
 
@@ -121,6 +122,7 @@ function showOverview() {
   coordinates?.close();
   if (expanded) view.setExpanded(false);
   expanded = false;
+  ui['back-to-layers'].textContent = 'Back to models';
 }
 async function inspectNumber(key, method = 'jlens', row = key === 'jacobian' ? 5 : 0, column = key === 'jacobian' ? 12 : 0) {
   if (!recording) return;
@@ -413,7 +415,10 @@ ui.example.onchange = () => loadExample();
 document.querySelectorAll('[name="strategy"]').forEach(input => { input.onchange = () => { strategy = input.value; showStrategy(); }; });
 ui.layer.onchange = () => { selected = Number(ui.layer.value); showFrame(Number(ui.step.value)); showHistory(); if (expanded) selectLayer(selected, selectedKind, false); };
 ui.expand.onclick = () => { ui['tokens-dialog'].close(); selectLayer(selected, selectedKind, false); };
-ui['back-to-layers'].onclick = showOverview;
+ui['back-to-layers'].onclick = () => {
+  if (expanded) showOverview();
+  else location.href = modelLink.href;
+};
 ui.position.onchange = () => { stopReplay(); showFrame(Number(ui.step.value)); };
 ui.step.oninput = () => { stopReplay(); showFrame(Number(ui.step.value)); };
 ui.play.onclick = () => timer ? stopReplay() : startReplay();
