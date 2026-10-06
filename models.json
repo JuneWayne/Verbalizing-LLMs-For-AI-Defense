@@ -41,7 +41,7 @@
     "kvHeads": 4,
     "linearValueHeads": null,
     "family": "granitemoehybrid",
-    "catalog": "models/antares-350m/catalog.json",
+    "catalog": "models/antares-350m/levels/level-1/catalog.json",
     "recordedLayers": [
       0,
       1,
@@ -73,12 +73,13 @@
     ],
     "residualMultiplier": 0.263,
     "logitsScaling": 4,
-    "rmsNormEps": 0.00001,
+    "rmsNormEps": 1e-05,
     "normWeightOffset": 0,
     "vocabSize": 100352,
     "hiddenActivation": "silu",
     "tiedEmbeddings": true,
-    "headDim": 64
+    "headDim": 64,
+    "system_levels": "models/antares-350m/levels.json"
   },
   {
     "id": "antares-1b",
@@ -134,7 +135,7 @@
     "kvHeads": 4,
     "linearValueHeads": null,
     "family": "granitemoehybrid",
-    "catalog": "models/antares-1b/catalog.json",
+    "catalog": "models/antares-1b/levels/level-1/catalog.json",
     "recordedLayers": [
       0,
       1,
@@ -178,12 +179,13 @@
     ],
     "residualMultiplier": 0.22,
     "logitsScaling": 8,
-    "rmsNormEps": 0.00001,
+    "rmsNormEps": 1e-05,
     "normWeightOffset": 0,
     "vocabSize": 100352,
     "hiddenActivation": "silu",
     "tiedEmbeddings": true,
-    "headDim": 128
+    "headDim": 128,
+    "system_levels": "models/antares-1b/levels.json"
   },
   {
     "id": "qwen2.5-0.5b-instruct",
@@ -223,7 +225,7 @@
     "kvHeads": 2,
     "linearValueHeads": null,
     "family": "qwen2",
-    "catalog": "models/qwen2.5-0.5b-instruct/catalog.json",
+    "catalog": "models/qwen2.5-0.5b-instruct/levels/level-1/catalog.json",
     "recordedLayers": [
       0,
       1,
@@ -251,12 +253,13 @@
     ],
     "residualMultiplier": 1,
     "logitsScaling": 1,
-    "rmsNormEps": 0.000001,
+    "rmsNormEps": 1e-06,
     "normWeightOffset": 0,
     "vocabSize": 151936,
     "hiddenActivation": "silu",
     "tiedEmbeddings": true,
-    "headDim": 64
+    "headDim": 64,
+    "system_levels": "models/qwen2.5-0.5b-instruct/levels.json"
   },
   {
     "id": "qwen2.5-1.5b-instruct",
@@ -300,7 +303,7 @@
     "kvHeads": 2,
     "linearValueHeads": null,
     "family": "qwen2",
-    "catalog": "models/qwen2.5-1.5b-instruct/catalog.json",
+    "catalog": "models/qwen2.5-1.5b-instruct/levels/level-1/catalog.json",
     "recordedLayers": [
       0,
       1,
@@ -332,12 +335,13 @@
     ],
     "residualMultiplier": 1,
     "logitsScaling": 1,
-    "rmsNormEps": 0.000001,
+    "rmsNormEps": 1e-06,
     "normWeightOffset": 0,
     "vocabSize": 151936,
     "hiddenActivation": "silu",
     "tiedEmbeddings": true,
-    "headDim": 128
+    "headDim": 128,
+    "system_levels": "models/qwen2.5-1.5b-instruct/levels.json"
   },
   {
     "id": "qwen2.5-7b-instruct",
@@ -381,7 +385,7 @@
     "kvHeads": 4,
     "linearValueHeads": null,
     "family": "qwen2",
-    "catalog": "models/qwen2.5-7b-instruct/catalog.json",
+    "catalog": "models/qwen2.5-7b-instruct/levels/level-1/catalog.json",
     "recordedLayers": [
       0,
       1,
@@ -413,12 +417,13 @@
     ],
     "residualMultiplier": 1,
     "logitsScaling": 1,
-    "rmsNormEps": 0.000001,
+    "rmsNormEps": 1e-06,
     "normWeightOffset": 0,
     "vocabSize": 152064,
     "hiddenActivation": "silu",
     "tiedEmbeddings": false,
-    "headDim": 128
+    "headDim": 128,
+    "system_levels": "models/qwen2.5-7b-instruct/levels.json"
   },
   {
     "id": "qwen3.5-4b",
@@ -467,7 +472,7 @@
     "linearValueHeads": 32,
     "family": "qwen3_5_text",
     "linearConvKernel": 4,
-    "catalog": "models/qwen3.5-4b/catalog.json",
+    "catalog": "models/qwen3.5-4b/levels/level-1/catalog.json",
     "recordedLayers": [
       0,
       1,
@@ -503,12 +508,13 @@
     ],
     "residualMultiplier": 1,
     "logitsScaling": 1,
-    "rmsNormEps": 0.000001,
+    "rmsNormEps": 1e-06,
     "normWeightOffset": 1,
     "vocabSize": 248320,
     "hiddenActivation": "silu",
     "tiedEmbeddings": true,
-    "headDim": 256
+    "headDim": 256,
+    "system_levels": "models/qwen3.5-4b/levels.json"
   },
   {
     "id": "foundation-sec-8b-reasoning",
@@ -556,7 +562,7 @@
     "kvHeads": 8,
     "linearValueHeads": null,
     "family": "llama",
-    "catalog": "models/foundation-sec-8b-reasoning/catalog.json",
+    "catalog": "models/foundation-sec-8b-reasoning/levels/level-1/catalog.json",
     "recordedLayers": [
       0,
       1,
@@ -592,11 +598,12 @@
     ],
     "residualMultiplier": 1,
     "logitsScaling": 1,
-    "rmsNormEps": 0.00001,
+    "rmsNormEps": 1e-05,
     "normWeightOffset": 0,
     "vocabSize": 128276,
     "hiddenActivation": "silu",
     "tiedEmbeddings": false,
-    "headDim": 128
+    "headDim": 128,
+    "system_levels": "models/foundation-sec-8b-reasoning/levels.json"
   }
 ]

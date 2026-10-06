@@ -1,8 +1,10 @@
+import { createLayerPlot } from './layer-plot.js?v=prompt-levels-35';
+import { unpackRecording } from './recording-codec.js?v=1';
 import { formatProbability } from './block-labels.js?v=transformer-terms-34';
 import { modelSummary } from './model-copy.js?v=transformer-terms-34';
 import { createFrameLoader } from './frame-loader.js?v=seek-replay-24';
 import { createCoordinateView } from './coordinate-view.js?v=transformer-terms-34';
-import { createScene } from './scene.js?v=transformer-terms-34';
+import { createScene } from './scene.js?v=prompt-levels-35';
 
 const ui = Object.fromEntries([...document.querySelectorAll('[id]')].map(element => [element.id, element]));
 const modelResponse = await fetch('./models.json', {cache: 'no-store'});
@@ -19,10 +21,40 @@ modelLink.href = './index.html?model=' + encodeURIComponent(modelId);
 document.title = 'Inside ' + activeModel.name + ' | Injection detection';
 document.querySelector('.subtitle').textContent = hasRecordings ? 'Recorded examples' : activeModel.layers + ' layers';
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+let levelIndex = null, traceHistory = null;
 let catalog, recording, weights, weightsPromise, frames = [], checkFrame, result, classificationIndex = -1;
 let strategy = 'strategy1', selected = 24, selectedKind = 'jlens', expanded = false, timer = null, requestNumber = 0;
 let download, coordinates, resumeReplay = false, frameLoader, displayedFrame, frameRequest = 0, playbackRun = 0;
 const recordingCache = new Map();
+const layerPlots = {jlens: createLayerPlot(ui['jlens-plot'], 'jlens', selectPlotLayer, seekPlotToken), logit_lens: createLayerPlot(ui['logit-plot'], 'logit_lens', selectPlotLayer, seekPlotToken)};
+let plotPanel = 'stacks';
+function selectPlotLayer(index) {
+  selected = index; ui.layer.value = index;
+  showFrame(Number(ui.step.value)); showHistory(); updateLevelTable();
+}
+function seekPlotToken(index) { stopReplay(); showFrame(Math.min(index, Number(ui.step.max))); }
+function showPlotPanel(panel, smooth = true) {
+  plotPanel = panel;
+  const viewport = ui['comparison-scroll'];
+  const left = panel === 'jlens' ? 0 : panel === 'stacks' ? ui.scene.offsetLeft : viewport.scrollWidth - viewport.clientWidth;
+  viewport.scrollTo({left, behavior: smooth && !reducedMotion.matches ? 'smooth' : 'instant'});
+}
+ui['show-jlens-plot'].onclick = () => showPlotPanel('jlens');
+ui['show-stacks'].onclick = () => showPlotPanel('stacks');
+ui['show-logit-plot'].onclick = () => showPlotPanel('logit_lens');
+// Remember the panel reached by touchpad or touch, not only navigation buttons.
+ui['comparison-scroll'].addEventListener('scrollend', () => {
+  if (expanded) return;
+  const viewport = ui['comparison-scroll'];
+  const positions = [['jlens', 0], ['stacks', ui.scene.offsetLeft], ['logit_lens', viewport.scrollWidth - viewport.clientWidth]];
+  plotPanel = positions.sort((a, b) => Math.abs(viewport.scrollLeft - a[1]) - Math.abs(viewport.scrollLeft - b[1]))[0][0];
+});
+// Horizontal touchpad movement navigates panels; ordinary wheel zoom stays in 3D.
+ui['comparison-scroll'].addEventListener('wheel', event => {
+  if (expanded || !(Math.abs(event.deltaX) > Math.abs(event.deltaY) || event.shiftKey)) return;
+  event.preventDefault(); event.stopPropagation();
+  ui['comparison-scroll'].scrollLeft += event.deltaX || event.deltaY;
+}, {capture: true, passive: false});
 // Load the shared family before drawing text into the 3D number textures.
 await document.fonts.load('14px "Viewer Comic"');
 const view = createScene(ui.scene, selectLayer, inspectNumber, activeModel.recordedLayers?.length || (hasRecordings ? 39 : activeModel.layers));
@@ -30,15 +62,34 @@ const view = createScene(ui.scene, selectLayer, inspectNumber, activeModel.recor
 // Keep the projected labels out of the fixed controls, including at browser zoom.
 function layoutScene() {
   const scale = Number(getComputedStyle(document.body).zoom) || 1;
-  const header = document.querySelector('header').getBoundingClientRect();
-  const actions = document.querySelector('.scene-actions').getBoundingClientRect();
+  const header = document.querySelector('header');
+  const actions = document.querySelector('.scene-actions');
   const narrow = innerWidth / scale < 704;
-  const top = (narrow ? Math.max(header.bottom, actions.bottom) : header.bottom) / scale + 16;
-  const bottom = (innerHeight - Math.min(document.querySelector('.playback').getBoundingClientRect().top, document.querySelector('.legend').getBoundingClientRect().top)) / scale + 16;
+  document.body.classList.toggle('comparison-compact', innerWidth / scale < 1000);
+  const legend = document.querySelector('.legend');
+  document.documentElement.style.setProperty('--compact-playback-bottom', (legend.offsetHeight + parseFloat(getComputedStyle(legend).bottom) + 16) + 'px');
+  // Move the action column below a wrapped model title.
+  const brand = document.querySelector('.brand');
+  actions.style.top = Math.max(narrow ? 88 : 90, brand.offsetTop + brand.offsetHeight + 16) + 'px';
+  const top = (narrow ? Math.max(header.offsetHeight, actions.offsetTop + actions.offsetHeight) : header.offsetHeight) + 16;
+  const bottom = Math.max(...['.playback', '.legend'].map(selector => {
+    const element = document.querySelector(selector);
+    return element.offsetHeight + parseFloat(getComputedStyle(element).bottom);
+  })) + 16;
+  // Short screens scroll vertically instead of hiding the graph behind controls.
+  const minimumHeight = top + bottom + 48 + 300;
+  const scrollPage = innerHeight / scale < minimumHeight;
+  document.body.classList.toggle('comparison-short', scrollPage);
+  document.body.style.minHeight = scrollPage ? minimumHeight + 'px' : '';
   document.documentElement.style.setProperty('--scene-top', top + 'px');
   document.documentElement.style.setProperty('--scene-bottom', bottom + 'px');
-  document.documentElement.style.setProperty('--scene-left', narrow ? '0px' : (actions.right / scale + 16) + 'px');
+  document.documentElement.style.setProperty('--scene-left', narrow ? '0px' : (actions.offsetLeft + actions.offsetWidth + 16) + 'px');
 }
+const comparisonObserver = new ResizeObserver(() => {
+  ui['comparison-scroll'].style.setProperty('--comparison-width', ui['comparison-scroll'].clientWidth + 'px');
+  showPlotPanel(plotPanel, false);
+});
+comparisonObserver.observe(ui['comparison-scroll']);
 const layoutObserver = new ResizeObserver(layoutScene);
 for (const selector of ['header', '.scene-actions', '.playback', '.legend']) layoutObserver.observe(document.querySelector(selector));
 window.addEventListener('resize', layoutScene);
@@ -53,6 +104,7 @@ window.addEventListener('resize', () => document.querySelectorAll('dialog[open]'
 
 async function openDialog(id) {
   stopReplay();
+  if (id === 'levels-dialog') updateLevelTable();
   if (id === 'tokens-dialog' && await showClassification() === false) return;
   fitDialog(ui[id]);
   ui[id].showModal();
@@ -114,6 +166,7 @@ async function selectLayer(index, kind = selectedKind, classification = true) {
   ui['back-to-layers'].textContent = 'Back to layers';
   ui.layer.value = selected;
   view.setExpanded(true, selected, kind);
+  ui['comparison-scroll'].scrollLeft = 0;
 
   showFrame(Number(ui.step.value));
   showHistory();
@@ -123,6 +176,7 @@ function showOverview() {
   if (expanded) view.setExpanded(false);
   expanded = false;
   ui['back-to-layers'].textContent = 'Back to models';
+  showPlotPanel('stacks', false);
 }
 async function inspectNumber(key, method = 'jlens', row = key === 'jacobian' ? 5 : 0, column = key === 'jacobian' ? 12 : 0) {
   if (!recording) return;
@@ -182,6 +236,7 @@ function showFrame(index, first = false) {
     }));
   }
   view.setFrame(frame, strategy, weights, first);
+  for (const [method, plot] of Object.entries(layerPlots)) plot.update(frame, activeModel.recordedLayers, strategy, selected, traceHistory || frameLoader.frames, catalog.system_level ? 'Level ' + catalog.system_level.level : '');
   if (!separate) frameLoader.prefetch(index);
   return true;
 }
@@ -308,10 +363,11 @@ async function compressed(file, hash, signal, retry = true) {
     error.code = 'RECORDING_CHANGED';
     throw error;
   }
-  return new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('gzip'))).json();
+  return unpackRecording(await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('gzip'))).json());
 }
 async function readCatalog(signal) {
-  const response = await fetch(activeModel.catalog || './catalog.json', { signal, cache: 'no-store' });
+  const selectedLevel = levelIndex?.levels.find(level => level.id === ui['system-level'].value);
+  const response = await fetch(selectedLevel?.catalog || activeModel.catalog || './catalog.json', { signal, cache: 'no-store' });
   if (!response.ok) throw new Error('The example list could not be loaded.');
   const latest = await response.json();
   if (latest.schema_version !== 2 || !Array.isArray(latest.examples)) throw new Error('The example list is incomplete.');
@@ -320,11 +376,14 @@ async function readCatalog(signal) {
 
 async function loadExample(retry = true) {
   stopReplay();
+  const previousPanel = expanded ? 'stacks' : plotPanel;
   showOverview();
+  showPlotPanel(previousPanel, false);
   const request = ++requestNumber;
   download?.abort();
   download = new AbortController();
   recording = null;
+  traceHistory = null;
   frames = [];
   displayedFrame = null;
   frameLoader = null;
@@ -333,6 +392,7 @@ async function loadExample(retry = true) {
   ui['classification-status'].hidden = true;
   checkFrame = null;
   view.setFrame(null, strategy, weights);
+  for (const plot of Object.values(layerPlots)) plot.update(null, [], strategy, selected);
   const example = catalog.examples.find(row => row.id === ui.example.value);
   ui['scene-message'].hidden = false;
   ui['scene-message'].textContent = example ? 'Loading recorded vectors and matrices…' : 'Choose a prompt to start';
@@ -355,6 +415,13 @@ async function loadExample(retry = true) {
     recording = saved;
     const start = saved.events.find(event => event.type === 'start');
     frameLoader = createFrameLoader(saved, compressed, download.signal);
+    // Compact score histories let plots seek without downloading every earlier matrix.
+    if (example.trace) compressed(example.trace.file, example.trace.sha256, download.signal).then(trace => {
+      if (request !== requestNumber) return;
+      if (trace.frames.length !== frameLoader.frames.length || trace.layers.join(',') !== activeModel.recordedLayers.join(',')) throw new Error('Trace does not match this recording.');
+      traceHistory = trace.frames;
+      if (displayedFrame) for (const [method, plot] of Object.entries(layerPlots)) plot.update(displayedFrame, activeModel.recordedLayers, strategy, selected, traceHistory, catalog.system_level ? 'Level ' + catalog.system_level.level : '');
+    }).catch(error => { if (request === requestNumber && error.name !== 'AbortError') ui.status.textContent = 'The full score history could not load. Playback still shows available token scores.'; });
     frames = frameLoader.frames;
     await frameLoader.ensure(0);
     if (request !== requestNumber) return;
@@ -411,7 +478,61 @@ async function loadExample(retry = true) {
   }
 }
 
-ui.example.onchange = () => loadExample();
+function updateLevelTable() {
+  const rows = levelIndex?.comparisons.filter(row => row.example_id === ui.example.value) || [];
+  ui['compare-levels'].disabled = rows.length === 0;
+  const example = catalog?.examples.find(example => example.id === ui.example.value);
+  ui['levels-layer'].textContent = example ? `${promptWording(example.title)} · Expected label: ${example.label} · Layer ${activeModel.recordedLayers[selected]}` : '';
+  ui['levels-results'].replaceChildren();
+  const number = value => Number.isFinite(value) ? Number(value.toPrecision(5)).toString() : 'Unavailable';
+  for (const row of rows) {
+    const level = levelIndex.levels.find(level => level.id === row.level_id);
+    const tr = document.createElement('tr');
+    const label = row.generated_label || 'No valid label';
+    for (const value of ['Level ' + level.level, label + (row.stop === 'token limit' ? ' (token limit)' : ''), number(row.model_difference), number(row.jlens?.strategy1[selected]), number(row.jlens?.strategy2[selected]), number(row.logit_lens?.[selected])]) {
+      const cell = document.createElement('td'); cell.textContent = value; tr.append(cell);
+    }
+    ui['levels-results'].append(tr);
+  }
+}
+function populatePrompts(previous = '') {
+  ui.example.replaceChildren(new Option('Choose a prompt', ''));
+  for (const group of [...new Set(catalog.examples.map(example => example.group))]) {
+    const options = document.createElement('optgroup'); options.label = promptWording(group);
+    for (const example of catalog.examples.filter(example => example.group === group)) options.append(new Option(promptWording(example.title), example.id));
+    ui.example.append(options);
+  }
+  ui.example.value = catalog.examples.some(example => example.id === previous) ? previous : '';
+  ui.example.disabled = false;
+}
+async function changeSystemLevel() {
+  const previousPanel = expanded ? 'stacks' : plotPanel;
+  stopReplay(); showOverview(); showPlotPanel(previousPanel, false);
+  const previous = ui.example.value;
+  const request = ++requestNumber;
+  download?.abort(); download = new AbortController();
+  recording = null; traceHistory = null; displayedFrame = null;
+  weights = null; weightsPromise = null;
+  view.setFrame(null, strategy, null);
+  for (const plot of Object.values(layerPlots)) plot.update(null, [], strategy, selected);
+  ui['system-level'].disabled = true;
+  for (const name of ['example', 'play', 'step', 'inspect', 'view-email', 'full-response', 'system-prompt', 'compare-levels']) ui[name].disabled = true;
+  try {
+    const next = await readCatalog(download.signal);
+    if (request !== requestNumber) return;
+    catalog = next;
+    populatePrompts(previous);
+    await loadExample();
+    updateLevelTable();
+  } catch (error) {
+    if (request === requestNumber && error.name !== 'AbortError') {
+      ui['scene-message'].hidden = false;
+      ui['scene-message'].textContent = 'This system prompt recording could not load. Select another level to retry.';
+    }
+  } finally { ui['system-level'].disabled = false; }
+}
+ui['system-level'].onchange = changeSystemLevel;
+ui.example.onchange = () => { loadExample(); updateLevelTable(); };
 document.querySelectorAll('[name="strategy"]').forEach(input => { input.onchange = () => { strategy = input.value; showStrategy(); }; });
 ui.layer.onchange = () => { selected = Number(ui.layer.value); showFrame(Number(ui.step.value)); showHistory(); if (expanded) selectLayer(selected, selectedKind, false); };
 ui.expand.onclick = () => { ui['tokens-dialog'].close(); selectLayer(selected, selectedKind, false); };
@@ -433,17 +554,18 @@ document.addEventListener('keydown', event => { if (event.key === 'Escape' && !d
 reducedMotion.addEventListener('change', stopReplay);
 
 if (hasRecordings) {
+  if (activeModel.system_levels) {
+    const response = await fetch(activeModel.system_levels, {cache: 'no-store'});
+    if (!response.ok) throw new Error('System prompt comparisons could not load.');
+    levelIndex = await response.json();
+    if (levelIndex.model_id !== activeModel.id || levelIndex.levels.length !== 5) throw new Error('System prompt comparisons do not match this model.');
+    ui['system-level'].replaceChildren(...levelIndex.levels.map(level => new Option('Level ' + level.level + ': ' + level.title, level.id)));
+  }
   catalog = await readCatalog();
+  ui['system-level'].disabled = !levelIndex;
   const summary = modelSummary(activeModel);
   ui.architecture.replaceChildren(Object.assign(document.createElement('summary'), {textContent: 'Model architecture'}), ...[summary.architecture, summary.attention, summary.normalization, summary.scaling, summary.vocabulary, summary.layers].map(text => Object.assign(document.createElement('p'), {textContent: text})));
-  ui.example.replaceChildren(new Option('Choose a prompt', ''));
-  for (const group of [...new Set(catalog.examples.map(example => example.group))]) {
-    const options = document.createElement('optgroup');
-    options.label = promptWording(group);
-    for (const example of catalog.examples.filter(example => example.group === group)) options.append(new Option(promptWording(example.title), example.id));
-    ui.example.append(options);
-  }
-  ui.example.disabled = false;
+  populatePrompts();
   ui['color-bar'].style.background = `linear-gradient(to right, ${Array.from({ length: 81 }, (_, index) => `${view.color(-20 + index / 2).getStyle()} ${index * 100 / 80}%`).join(', ')})`;
   showStrategy();
   ui['scene-message'].textContent = 'Choose a prompt to start';

@@ -306,14 +306,15 @@ export function createScene(container, onLayer, onNumber, layerCount = 39) {
     context.font = (stage.columns === 1 ? '40px' : '44px') + ' "Viewer Comic", "Comic Sans MS", "Comic Sans", cursive';
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    for (let row = 0; row < stage.rows; row++) {
+    const rows = Math.min(stage.rows, Math.max(1, Math.ceil(values.length / stage.columns)));
+    for (let row = 0; row < rows; row++) {
       for (let col = 0; col < stage.columns; col++) {
-        const x = col * width / stage.columns, y = row * height / stage.rows;
+        const x = col * width / stage.columns, y = row * height / rows;
         const value = values[row * stage.columns + col];
         context.strokeStyle = '#b7c9db';
-        context.strokeRect(x, y, width / stage.columns, height / stage.rows);
+        context.strokeRect(x, y, width / stage.columns, height / rows);
         context.fillStyle = '#243b55';
-        context.fillText(Number.isFinite(value) ? (stage.key === 'softmax' ? formatProbability(value) : value.toFixed(2)) : '…', x + width / stage.columns / 2, y + height / stage.rows / 2, width / stage.columns - 12);
+        context.fillText(Number.isFinite(value) ? (stage.key === 'softmax' ? formatProbability(value) : value.toFixed(2)) : '…', x + width / stage.columns / 2, y + height / rows / 2, width / stage.columns - 12);
       }
     }
     stage.texture.needsUpdate = true;
