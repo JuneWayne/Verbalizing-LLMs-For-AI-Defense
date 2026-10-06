@@ -1,4 +1,4 @@
-import { createLayerPlot } from './layer-plot.js?v=plot-captions-37';
+import { createLayerPlot } from './layer-plot.js?v=large-plots-39';
 import { connectPanelGestures } from './panel-gestures.js?v=1';
 import { unpackRecording } from './recording-codec.js?v=1';
 import { formatProbability } from './block-labels.js?v=transformer-terms-34';
@@ -24,7 +24,7 @@ document.querySelector('.subtitle').textContent = hasRecordings ? 'Recorded exam
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let levelIndex = null, traceHistory = null;
 let catalog, recording, weights, weightsPromise, frames = [], checkFrame, result, classificationIndex = -1;
-let strategy = 'strategy1', selected = 24, selectedKind = 'jlens', expanded = false, timer = null, requestNumber = 0;
+let strategy = 'strategy1', selected = (activeModel.recordedLayers?.length || activeModel.layers) - 1, selectedKind = 'jlens', expanded = false, timer = null, requestNumber = 0;
 // Remember which controls the visitor has inspected, including across model pages.
 const inspectedControls = new Set();
 function updateControlHint(element, key, inspected = false) {
@@ -81,7 +81,7 @@ function layoutScene() {
     return element.offsetHeight + parseFloat(getComputedStyle(element).bottom);
   })) + 16;
   // Short screens scroll vertically instead of hiding the graph behind controls.
-  const minimumHeight = top + bottom + (narrow ? 400 : 300);
+  const minimumHeight = top + bottom + (narrow ? 520 : 460);
   const scrollPage = innerHeight / scale < minimumHeight;
   document.body.classList.toggle('comparison-short', scrollPage);
   document.body.style.minHeight = scrollPage ? minimumHeight + 'px' : '';

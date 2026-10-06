@@ -2,13 +2,13 @@
 #comparison-scroll { position: fixed; inset: var(--scene-top, 140px) 0 var(--scene-bottom, 140px) var(--scene-left, 172px); overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-color: #a8b9d1 transparent; cursor: grab; touch-action: pan-x pan-y pinch-zoom; }
 #comparison-scroll.dragging { cursor: grabbing; user-select: none; }
 body:not(.view-detail) #scene canvas { touch-action: pan-x pan-y pinch-zoom !important; }
-#comparison-track { display: grid; grid-template-columns: min(440px, var(--comparison-width)) var(--comparison-width) min(440px, var(--comparison-width)); min-height: 100%; width: max-content; align-items: stretch; }
+#comparison-track { display: grid; grid-template-columns: min(1000px, var(--comparison-width)) var(--comparison-width) min(1000px, var(--comparison-width)); min-height: 100%; width: max-content; align-items: stretch; }
 #comparison-track #scene { position: relative; inset: auto; width: var(--comparison-width); height: 100%; min-height: 180px; }
 .layer-plot { padding: 24px 12px; align-self: center; max-height: 100%; overflow-y: auto; }
-.layer-plot h2 { text-align: center; }
+.layer-plot h2 { text-align: start; align-self: center; }
 .layer-plot svg { width: 100%; min-width: 280px; display: block; overflow: visible; direction: ltr; }
 .layer-plot p { font-size: 13px; text-align: center; margin-block: 10px; }
-.plot-caption { min-height: 5lh; }
+.plot-caption { min-height: 3lh; }
 .plot-end-label { fill: currentColor; font: 13px var(--font-ui); paint-order: stroke; stroke: var(--background, #edf2f7); stroke-width: 5px; stroke-linejoin: round; }
 .plot-label-link { stroke: currentColor; stroke-width: 1; }
 .plot-axis, .plot-tick { fill: var(--text); font-family: var(--font-ui); font-size: 13px; }
@@ -27,7 +27,6 @@ body:not(.view-detail) #scene canvas { touch-action: pan-x pan-y pinch-zoom !imp
   .layer-plot h2 { font-size: 15px; text-align: start; align-self: center; }
   .layer-plot .plot-layer-control { font-size: 12px; }
   .layer-plot svg, .layer-plot p { grid-column: 1 / -1; }
-  .layer-plot svg { max-height: 260px; }
   .layer-plot p { font-size: 12px; margin-block: 4px; }
   .plot-layer-control select { min-height: 36px; }
   .layer-plot { padding-block: 12px; }
@@ -41,11 +40,12 @@ body:not(.view-detail) #scene canvas { touch-action: pan-x pan-y pinch-zoom !imp
 #comparison-scroll { direction: ltr; }
 body.comparison-short { position: relative; }
 .comparison-short > header, .comparison-short .scene-actions, .comparison-short #comparison-scroll, .comparison-short .playback, .comparison-short .legend { position: absolute; }
-.layer-plot { height: 100%; min-height: 0; display: grid; grid-template-rows: auto auto minmax(176px, 1fr) auto; }
-.layer-plot svg { height: 100%; min-height: 0; max-height: 380px; align-self: center; }
+.layer-plot { height: 100%; min-height: 0; display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto minmax(300px, 1fr) auto; }
+.layer-plot svg, .layer-plot p { grid-column: 1 / -1; }
+.layer-plot svg { height: 100%; min-height: 0; align-self: stretch; }
 @media (max-width: 44rem) {
   .brand { max-width: calc(100% - 112px); }
-  .layer-plot { grid-template-rows: auto minmax(176px, 1fr) auto; }
+  .layer-plot { grid-template-rows: auto minmax(300px, 1fr) auto; }
   .layer-plot svg { max-height: none; }
 }
 

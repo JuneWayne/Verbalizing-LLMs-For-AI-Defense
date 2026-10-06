@@ -52,7 +52,8 @@ export function createLayerPlot(host, method, onLayer, onToken) {
   svg.onclick = event => {
     if (!tokenCount) return;
     const bounds = svg.getBoundingClientRect();
-    const token = Math.round(((event.clientX - bounds.left) * 480 / bounds.width - 76) / 360 * Math.max(1, tokenCount - 1));
+    const width = svg.viewBox.baseVal.width;
+    const token = Math.round(((event.clientX - bounds.left) * width / bounds.width - 76) / (width - 120) * Math.max(1, tokenCount - 1));
     onToken(Math.max(0, Math.min(tokenCount - 1, token)));
   };
   function update(frame, layers, strategy, selected, history = [], level = '') {
@@ -69,18 +70,19 @@ export function createLayerPlot(host, method, onLayer, onToken) {
     const known = all.flatMap(row => [row.injection, row.safe]).filter(Number.isFinite);
     const low = known.length ? Math.min(...known) : -1, high = known.length ? Math.max(...known) : 1;
     const padding = Math.max(1, (high - low) * .1), minimum = low - padding, maximum = high + padding;
-    const plotHeight = Math.max(230, svg.clientHeight / Math.max(1, svg.clientWidth) * 480);
-    svg.setAttribute('viewBox', `0 0 480 ${plotHeight}`);
+    const plotWidth = Math.max(480, svg.clientWidth);
+    const plotHeight = Math.max(230, svg.clientHeight / Math.max(1, svg.clientWidth) * plotWidth);
+    svg.setAttribute('viewBox', `0 0 ${plotWidth} ${plotHeight}`);
     const center = (34 + plotHeight - 74) / 2;
-    const x = token => 76 + (token - 1) / Math.max(1, tokenCount - 1) * 360;
+    const x = token => 76 + (token - 1) / Math.max(1, tokenCount - 1) * (plotWidth - 120);
     const y = value => 34 + (maximum - value) / (maximum - minimum) * (plotHeight - 108);
     for (const value of [minimum, (minimum + maximum) / 2, maximum]) {
-      add('line', {x1: 76, x2: 436, y1: y(value), y2: y(value), class: value === 0 ? 'plot-zero' : 'plot-grid'});
+      add('line', {x1: 76, x2: plotWidth - 44, y1: y(value), y2: y(value), class: value === 0 ? 'plot-zero' : 'plot-grid'});
       add('text', {x: 66, y: y(value) + 5, 'text-anchor': 'end', class: 'plot-tick'}, Number(value.toPrecision(3)).toString());
     }
     const ticks = [...new Set([1, Math.max(1, Math.round(tokenCount / 2)), Math.max(1, tokenCount)])];
     ticks.forEach(token => add('text', {x: x(token), y: plotHeight - 48, 'text-anchor': 'middle', class: 'plot-tick'}, String(token)));
-    add('text', {x: 256, y: plotHeight - 14, 'text-anchor': 'middle', class: 'plot-axis'}, 'Response token');
+    add('text', {x: (plotWidth + 32) / 2, y: plotHeight - 14, 'text-anchor': 'middle', class: 'plot-axis'}, 'Response token');
     add('text', {x: 19, y: center, transform: `rotate(-90 19 ${center})`, 'text-anchor': 'middle', class: 'plot-axis'}, 'Token logit');
     if (!frame) return;
     const rows = method === 'jlens' ? frame.jlens[strategy] : frame.logit_lens;
@@ -109,7 +111,7 @@ export function createLayerPlot(host, method, onLayer, onToken) {
       const labelY = Math.max(18, Math.min(plotHeight - 80, end.position));
       const text = add('text', {y: labelY + 4, class: `plot-end-label plot-${end.label}`, 'data-label': end.label}, `${end.label} · ${scoreText(scores[end.label])}`);
       const width = text.getComputedTextLength();
-      const labelX = x(frame.step) + width + 20 <= 472 ? x(frame.step) + 12 : x(frame.step) - width - 12;
+      const labelX = x(frame.step) + width + 20 <= plotWidth - 8 ? x(frame.step) + 12 : x(frame.step) - width - 12;
       text.setAttribute('x', labelX);
       const connector = add('line', {x1: x(frame.step), y1: y(scores[end.label]), x2: labelX < x(frame.step) ? labelX + width + 4 : labelX - 4, y2: labelY, class: `plot-label-link plot-${end.label}`});
       svg.insertBefore(connector, text);
