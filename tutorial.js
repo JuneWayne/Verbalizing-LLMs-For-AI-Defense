@@ -63,7 +63,7 @@ function guideSteps(view) {
     ...(loaded ? [
       ['#view-email', 'Read the input', 'Click View prompt to see the exact prompt, its dataset label, and its source.'],
       ['#system-prompt', 'Read the instructions', 'Click System prompt to see the instructions the model received for this recording.'],
-      ['.plot-navigation', 'Follow a layer over time', 'Open the Jlens plot on the left or the Logit lens plot on the right. Choose a layer to watch its injection minus safe logit difference as response tokens play. Both plots follow the same layer and response token.'],
+      ['#comparison-scroll', 'Follow a layer over time', 'Swipe horizontally on your touchpad or touchscreen, or drag with your mouse. The Jlens plot is on the left and the Logit lens plot is on the right. Choose a layer to compare its injection and safe token logits as the response plays.'],
       ...(!document.querySelector('#compare-levels')?.disabled ? [['#compare-levels', 'Compare the final decisions', 'Compare the five generated labels and both Jlens strategies. The table uses scores immediately before each generated label and reports missing labels separately.']] : []),
       ['.playback-row', 'Control the replay', 'Pause the response or drag the slider to a token. Press play to continue from that position.'],
       ['#main > .legend', 'Read the colors', 'Blue favors safe and orange favors injection. The number compares the injection token score with the safe token score at the selected response position.'],

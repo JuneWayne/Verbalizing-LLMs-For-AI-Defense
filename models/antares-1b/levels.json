@@ -2760,7 +2760,7 @@
       ]
     }
   ],
-  "bytes": 29660746,
+  "bytes": 30536663,
   "comparison": "Same supplied prompt, classification instruction, decoding settings and trained lenses; only the system message changes.",
   "example_ids": [
     "office-1056-safe",

@@ -1500,7 +1500,7 @@
       "logit_lens": null
     }
   ],
-  "bytes": 1363106,
+  "bytes": 1404256,
   "comparison": "Same supplied prompt, classification instruction, decoding settings and trained lenses; only the system message changes.",
   "example_ids": [
     "office-1056-safe",

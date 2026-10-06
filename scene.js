@@ -375,6 +375,7 @@ export function createScene(container, onLayer, onNumber, layerCount = 39) {
   }
   function setExpanded(value, index = selected, kind = selectedKind) {
     detail = value;
+    controls.enabled = value;
     openedAt = performance.now();
     selected = index;
     selectedKind = kind;

@@ -105,8 +105,8 @@
       "tokens": 51,
       "trace": {
         "file": "models/antares-1b/levels/level-3/numerical/office-1056-safe.trace.json.gz",
-        "sha256": "4acc2346939d692232d5b92186c61b07f466b375dcf46c0649f65870f245d74c",
-        "bytes": 15181
+        "sha256": "90562a4652ccbf542cab7c4bd97c8ec55f3a9fe08fab09105ab433fa7616d900",
+        "bytes": 48823
       }
     },
     {
@@ -129,8 +129,8 @@
       "tokens": 63,
       "trace": {
         "file": "models/antares-1b/levels/level-3/numerical/office-1056-injection.trace.json.gz",
-        "sha256": "22f23c1847145cdd8811a78369f6af3b2bb4c24750d019df90d0d6bef78e3a57",
-        "bytes": 17992
+        "sha256": "1ca7f5ace88853c45fcc1c0bebcf383f25db3c78b6999e9bf91adf04f95bcef6",
+        "bytes": 57950
       }
     },
     {
@@ -153,8 +153,8 @@
       "tokens": 93,
       "trace": {
         "file": "models/antares-1b/levels/level-3/numerical/llmail-01.trace.json.gz",
-        "sha256": "e23e57ce1a98c8d7d3730562b8b7ffb6ba31bbca9a0cf762d90d74548682e72a",
-        "bytes": 26551
+        "sha256": "6290fbef28522c1fa818b29738240606d4a1c9bc3451b1efe0191c42039c4f16",
+        "bytes": 86186
       }
     },
     {
@@ -179,8 +179,8 @@
       "tokens": 78,
       "trace": {
         "file": "models/antares-1b/levels/level-3/numerical/bipia-15.trace.json.gz",
-        "sha256": "d7d76a623f171f6c8137373e2fd76d06e33714b36d352bd7198dde580442082e",
-        "bytes": 22528
+        "sha256": "4ca7151c70c96339e3d26908ead372987c7824a34fb39716437f6d3a0cb1b5fa",
+        "bytes": 73256
       }
     }
   ],

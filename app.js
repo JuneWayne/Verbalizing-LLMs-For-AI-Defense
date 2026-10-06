@@ -1,10 +1,11 @@
-import { createLayerPlot } from './layer-plot.js?v=prompt-levels-35';
+import { createLayerPlot } from './layer-plot.js?v=token-lines-36';
+import { connectPanelGestures } from './panel-gestures.js?v=1';
 import { unpackRecording } from './recording-codec.js?v=1';
 import { formatProbability } from './block-labels.js?v=transformer-terms-34';
 import { modelSummary } from './model-copy.js?v=transformer-terms-34';
 import { createFrameLoader } from './frame-loader.js?v=seek-replay-24';
 import { createCoordinateView } from './coordinate-view.js?v=transformer-terms-34';
-import { createScene } from './scene.js?v=prompt-levels-35';
+import { createScene } from './scene.js?v=token-lines-36';
 
 const ui = Object.fromEntries([...document.querySelectorAll('[id]')].map(element => [element.id, element]));
 const modelResponse = await fetch('./models.json', {cache: 'no-store'});
@@ -39,25 +40,18 @@ function showPlotPanel(panel, smooth = true) {
   const left = panel === 'jlens' ? 0 : panel === 'stacks' ? ui.scene.offsetLeft : viewport.scrollWidth - viewport.clientWidth;
   viewport.scrollTo({left, behavior: smooth && !reducedMotion.matches ? 'smooth' : 'instant'});
 }
-ui['show-jlens-plot'].onclick = () => showPlotPanel('jlens');
-ui['show-stacks'].onclick = () => showPlotPanel('stacks');
-ui['show-logit-plot'].onclick = () => showPlotPanel('logit_lens');
-// Remember the panel reached by touchpad or touch, not only navigation buttons.
+// Remember the current area without snapping after a swipe or drag.
 ui['comparison-scroll'].addEventListener('scrollend', () => {
   if (expanded) return;
   const viewport = ui['comparison-scroll'];
   const positions = [['jlens', 0], ['stacks', ui.scene.offsetLeft], ['logit_lens', viewport.scrollWidth - viewport.clientWidth]];
   plotPanel = positions.sort((a, b) => Math.abs(viewport.scrollLeft - a[1]) - Math.abs(viewport.scrollLeft - b[1]))[0][0];
 });
-// Horizontal touchpad movement navigates panels; ordinary wheel zoom stays in 3D.
-ui['comparison-scroll'].addEventListener('wheel', event => {
-  if (expanded || !(Math.abs(event.deltaX) > Math.abs(event.deltaY) || event.shiftKey)) return;
-  event.preventDefault(); event.stopPropagation();
-  ui['comparison-scroll'].scrollLeft += event.deltaX || event.deltaY;
-}, {capture: true, passive: false});
+connectPanelGestures(ui['comparison-scroll'], () => expanded);
 // Load the shared family before drawing text into the 3D number textures.
 await document.fonts.load('14px "Viewer Comic"');
 const view = createScene(ui.scene, selectLayer, inspectNumber, activeModel.recordedLayers?.length || (hasRecordings ? 39 : activeModel.layers));
+view.controls.enabled = false;
 
 // Keep the projected labels out of the fixed controls, including at browser zoom.
 function layoutScene() {
@@ -77,7 +71,7 @@ function layoutScene() {
     return element.offsetHeight + parseFloat(getComputedStyle(element).bottom);
   })) + 16;
   // Short screens scroll vertically instead of hiding the graph behind controls.
-  const minimumHeight = top + bottom + 48 + 300;
+  const minimumHeight = top + bottom + (narrow ? 400 : 300);
   const scrollPage = innerHeight / scale < minimumHeight;
   document.body.classList.toggle('comparison-short', scrollPage);
   document.body.style.minHeight = scrollPage ? minimumHeight + 'px' : '';
@@ -198,7 +192,7 @@ function showFrame(index, first = false) {
   const displayRequest = ++frameRequest;
   if (!separate) { ui.step.value = index; frameLoader.focus(index); }
   if (!frame.layer_values) {
-    ui['step-label'].textContent = `Loading token ${index + 1} of ${frames.length}`;
+    ui['step-label'].textContent = 'Loading data';
     ui.step.setAttribute('aria-busy', 'true');
     const request = requestNumber;
     frameLoader.ensure(index).then(() => {
@@ -293,8 +287,8 @@ function startReplay(fromStart = false) {
       try {
         loader.focus(index);
         if (!frames[index]?.layer_values) {
-          ui['play-state'].textContent = 'Loading…';
-          ui['step-label'].textContent = `Loading token ${index + 1} of ${frames.length}`;
+          ui['play-state'].textContent = 'Loading data';
+          ui['step-label'].textContent = 'Loading data';
           ui.step.setAttribute('aria-busy', 'true');
           await loader.ensure(index);
         }
@@ -395,12 +389,12 @@ async function loadExample(retry = true) {
   for (const plot of Object.values(layerPlots)) plot.update(null, [], strategy, selected);
   const example = catalog.examples.find(row => row.id === ui.example.value);
   ui['scene-message'].hidden = false;
-  ui['scene-message'].textContent = example ? 'Loading recorded vectors and matrices…' : 'Choose a prompt to start';
+  ui['scene-message'].textContent = example ? 'Loading data' : 'Choose a prompt to start';
   for (const name of ['play', 'step', 'position', 'layer', 'expand', 'inspect', 'view-email', 'full-response', 'system-prompt']) ui[name].disabled = true;
   for (const name of ['response', 'decision', 'layer-history', 'prompt', 'position-note']) ui[name].textContent = '';
   for (const prefix of ['j', 'l', 'm']) for (const suffix of ['score', 'labels', 'tokens']) ui[`${prefix}-${suffix}`].replaceChildren();
   if (!example) { ui.status.textContent = ''; ui['step-label'].textContent = 'Choose a prompt'; ui['token-preview'].textContent = ''; return; }
-  ui.status.textContent = 'Loading recording';
+  ui.status.textContent = 'Loading data';
   ui.email.textContent = example.text;
   ui.expected.textContent = `Dataset label: ${example.label}`;
   ui.source.textContent = `Source: ${sourceName(example.source)}`;
@@ -460,7 +454,7 @@ async function loadExample(retry = true) {
     // The page may stay open while recordings change. Refresh the catalog once,
     // then verify the newly downloaded files again. Never bypass the hash check.
     if (retry && error.code === 'RECORDING_CHANGED') {
-      ui['scene-message'].textContent = 'Loading the updated recording…';
+      ui['scene-message'].textContent = 'Loading data';
       try {
         const latest = await readCatalog(download.signal);
         if (request !== requestNumber) return;
@@ -559,7 +553,7 @@ if (hasRecordings) {
     if (!response.ok) throw new Error('System prompt comparisons could not load.');
     levelIndex = await response.json();
     if (levelIndex.model_id !== activeModel.id || levelIndex.levels.length !== 5) throw new Error('System prompt comparisons do not match this model.');
-    ui['system-level'].replaceChildren(...levelIndex.levels.map(level => new Option('Level ' + level.level + ': ' + level.title, level.id)));
+    ui['system-level'].replaceChildren(...levelIndex.levels.map(level => new Option('Level ' + level.level, level.id)));
   }
   catalog = await readCatalog();
   ui['system-level'].disabled = !levelIndex;

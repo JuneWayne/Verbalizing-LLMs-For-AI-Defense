@@ -92,8 +92,8 @@
       "tokens": 50,
       "trace": {
         "file": "models/qwen2.5-7b-instruct/levels/level-1/numerical/office-1056-safe.trace.json.gz",
-        "sha256": "f75c6f79a164675b1f8d66d764f680418698116421528eacb2424a69657e6de5",
-        "bytes": 11355
+        "sha256": "90371135867d957daac8fd6fbf915f20f7f6519c2c772fb8c0d504fac95fac94",
+        "bytes": 34422
       }
     },
     {
@@ -116,8 +116,8 @@
       "tokens": 78,
       "trace": {
         "file": "models/qwen2.5-7b-instruct/levels/level-1/numerical/office-1056-injection.trace.json.gz",
-        "sha256": "e95fa3873678206dd352c641ffed231fa5274bdb0473b0b835a41c21dc2b8137",
-        "bytes": 17181
+        "sha256": "5fbdef30f173ef9811e9c7b0805c9152638520882a896f889cf39313a3d4e66b",
+        "bytes": 53198
       }
     },
     {
@@ -140,8 +140,8 @@
       "tokens": 77,
       "trace": {
         "file": "models/qwen2.5-7b-instruct/levels/level-1/numerical/llmail-01.trace.json.gz",
-        "sha256": "638b517665c9a9b3a62e6dbb60031c63721322dd97e8d66a68289683d441f2bd",
-        "bytes": 17047
+        "sha256": "a23c5c959e9c718f301deb47a7a7170c2994e2f3671032a190df3c3e6337013f",
+        "bytes": 52485
       }
     },
     {
@@ -166,8 +166,8 @@
       "tokens": 54,
       "trace": {
         "file": "models/qwen2.5-7b-instruct/levels/level-1/numerical/bipia-15.trace.json.gz",
-        "sha256": "5f7ec6c14f5a9099fcc082fbcbde2881f8b17d77a25e12797d8f60c5e106231e",
-        "bytes": 12180
+        "sha256": "a3db647da77245e63579b251eefaa2b8531e09a765f2b650ef5758ea8dbf25a0",
+        "bytes": 36938
       }
     }
   ],
