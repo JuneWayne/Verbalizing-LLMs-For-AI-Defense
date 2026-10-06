@@ -1,11 +1,11 @@
-import { createLayerPlot } from './layer-plot.js?v=token-lines-36';
+import { createLayerPlot } from './layer-plot.js?v=plot-captions-37';
 import { connectPanelGestures } from './panel-gestures.js?v=1';
 import { unpackRecording } from './recording-codec.js?v=1';
 import { formatProbability } from './block-labels.js?v=transformer-terms-34';
 import { modelSummary } from './model-copy.js?v=transformer-terms-34';
 import { createFrameLoader } from './frame-loader.js?v=seek-replay-24';
 import { createCoordinateView } from './coordinate-view.js?v=transformer-terms-34';
-import { createScene } from './scene.js?v=token-lines-36';
+import { createScene } from './scene.js?v=plot-captions-37';
 
 const ui = Object.fromEntries([...document.querySelectorAll('[id]')].map(element => [element.id, element]));
 const modelResponse = await fetch('./models.json', {cache: 'no-store'});

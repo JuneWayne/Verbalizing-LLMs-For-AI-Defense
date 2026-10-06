@@ -17,13 +17,22 @@ export function tokenLogits(history, layer, strategy, method, throughStep) {
   });
 }
 
+const scoreText = value => Number(value.toPrecision(6)).toString();
+
+export function plotCaption(layer, method, injection, safe) {
+  const lens = method === 'jlens' ? 'Jlens' : 'Logit lens';
+  if (!Number.isFinite(injection) || !Number.isFinite(safe)) return `Token scores are unavailable at layer ${layer}.`;
+  if (injection === safe) return `The lines are tied. At layer ${layer}, ${lens} gives injection and safe the same next-token score: ${scoreText(safe)}.`;
+  const leading = injection > safe;
+  return `The ${leading ? 'orange' : 'blue'} line is higher. At layer ${layer}, ${lens} scores ${leading ? 'injection above safe' : 'safe above injection'} for the next token: ${scoreText(leading ? injection : safe)} versus ${scoreText(leading ? safe : injection)}.`;
+}
+
 export function createLayerPlot(host, method, onLayer, onToken) {
   const title = method === 'jlens' ? 'Jlens verbalization' : 'Logit lens verbalization';
   host.innerHTML = `<h2>${title}</h2><label class="plot-layer-control">Layer <select aria-label="${title} plot layer"></select></label>
-    <p class="plot-step">Choose a prompt to start</p>
-    <svg viewBox="0 0 480 380" role="img" aria-label="Injection and safe token logits over response tokens"></svg>
-    <p class="plot-reading"><span class="plot-key plot-injection">injection</span> <span class="plot-key plot-safe">safe</span><br>Next-token scores at this layer. The higher line favors that label token.</p><p class="plot-point"></p>`;
-  const svg = host.querySelector('svg'), step = host.querySelector('.plot-step'), point = host.querySelector('.plot-point'), select = host.querySelector('select');
+    <svg viewBox="0 0 480 380" role="img" aria-label="Token logits"></svg>
+    <p class="plot-caption">Choose a prompt to start</p>`;
+  const svg = host.querySelector('svg'), caption = host.querySelector('.plot-caption'), select = host.querySelector('select');
   const ns = 'http://www.w3.org/2000/svg';
   select.disabled = true;
   select.onchange = () => onLayer(Number(select.value));
@@ -54,7 +63,7 @@ export function createLayerPlot(host, method, onLayer, onToken) {
     tokenCount = currentHistory.length;
     svg.replaceChildren();
     delete svg.dataset.step; delete svg.dataset.differences; delete svg.dataset.logits;
-    step.textContent = frame ? `${level ? level + ' · ' : ''}Response token ${frame.step}${method === 'jlens' ? ' · ' + (strategy === 'strategy1' ? 'Strategy 1' : 'Strategy 2') : ''}` : 'Choose a prompt to start';
+    caption.textContent = 'Choose a prompt to start';
     const all = tokenLogits(currentHistory, selected, strategy, method, Infinity);
     const data = all.filter(row => row.step <= (frame?.step || 0));
     const known = all.flatMap(row => [row.injection, row.safe]).filter(Number.isFinite);
@@ -73,7 +82,6 @@ export function createLayerPlot(host, method, onLayer, onToken) {
     ticks.forEach(token => add('text', {x: x(token), y: plotHeight - 48, 'text-anchor': 'middle', class: 'plot-tick'}, String(token)));
     add('text', {x: 256, y: plotHeight - 14, 'text-anchor': 'middle', class: 'plot-axis'}, 'Response token');
     add('text', {x: 19, y: center, transform: `rotate(-90 19 ${center})`, 'text-anchor': 'middle', class: 'plot-axis'}, 'Token logit');
-    point.textContent = '';
     if (!frame) return;
     const rows = method === 'jlens' ? frame.jlens[strategy] : frame.logit_lens;
     for (const label of ['injection', 'safe']) {
@@ -88,7 +96,24 @@ export function createLayerPlot(host, method, onLayer, onToken) {
       if (Number.isFinite(value)) add('circle', {cx: x(frame.step), cy: y(value), r: 4, class: `plot-current plot-${label}`});
     }
     add('line', {x1: x(frame.step), x2: x(frame.step), y1: 34, y2: plotHeight - 74, class: 'plot-cursor'});
-    point.textContent = ['injection', 'safe'].map(label => `${label}: ${Number(rows[selected].label_logits[label].toPrecision(5))}`).join(' · ');
+    const scores = rows[selected].label_logits;
+    caption.textContent = plotCaption(layers[selected], method, scores.injection, scores.safe);
+    // Separate nearby labels while keeping a connector to each exact score.
+    const ends = ['injection', 'safe'].filter(label => Number.isFinite(scores[label]))
+      .map(label => ({label, position: y(scores[label])})).sort((a, b) => a.position - b.position);
+    if (ends.length === 2 && ends[1].position - ends[0].position < 28) {
+      const middle = (ends[0].position + ends[1].position) / 2;
+      ends[0].position = middle - 14; ends[1].position = middle + 14;
+    }
+    for (const end of ends) {
+      const labelY = Math.max(18, Math.min(plotHeight - 80, end.position));
+      const text = add('text', {y: labelY + 4, class: `plot-end-label plot-${end.label}`, 'data-label': end.label}, `${end.label} · ${scoreText(scores[end.label])}`);
+      const width = text.getComputedTextLength();
+      const labelX = x(frame.step) + width + 20 <= 472 ? x(frame.step) + 12 : x(frame.step) - width - 12;
+      text.setAttribute('x', labelX);
+      const connector = add('line', {x1: x(frame.step), y1: y(scores[end.label]), x2: labelX < x(frame.step) ? labelX + width + 4 : labelX - 4, y2: labelY, class: `plot-label-link plot-${end.label}`});
+      svg.insertBefore(connector, text);
+    }
     svg.dataset.step = String(frame.step);
     svg.dataset.layer = String(layers[selected]);
     svg.dataset.strategy = strategy;

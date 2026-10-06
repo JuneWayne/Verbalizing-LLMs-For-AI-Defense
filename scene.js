@@ -28,7 +28,7 @@ export function createScene(container, onLayer, onNumber, layerCount = 39) {
   controls.maxPolarAngle = Math.PI * .49;
   controls.listenToKeyEvents(renderer.domElement);
   renderer.domElement.tabIndex = 0;
-  renderer.domElement.setAttribute('aria-label', '3D model. Shift and arrow keys rotate, arrow keys pan, plus and minus zoom. Inspect layers and component labels provide keyboard access.');
+  renderer.domElement.setAttribute('aria-label', 'Interactive model');
   scene.add(new THREE.HemisphereLight('#ffffff', '#ccd5e1', 2.1));
   const light = new THREE.DirectionalLight('#ffffff', 2);
   light.position.set(-15, 24, 20);
