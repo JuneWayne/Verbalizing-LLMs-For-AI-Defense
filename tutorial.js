@@ -58,13 +58,13 @@ function guideSteps(view) {
   return [
     ['#example', 'Choose a prompt', 'Select a prompt to replay a saved model response. The colored layers update as the model generates each token.'],
     ...(!document.querySelector('#system-level')?.disabled ? [['#system-level', 'Compare system instructions', 'Select one of the five original system prompts. This loads a separate recorded response to the same supplied prompt.']] : []),
-    ['.strategy-switch', 'Compare Jlens strategies', 'Switch between the two fitted Jlens matrices. Both strategies read the same model response and hidden states.'],
-    ['[data-dialog="training-dialog"]', 'Read about training', 'Click About training to see the selected strategy’s dataset and prompt format.'],
+    ['.strategy-switch', 'Compare Jlens training methods', 'Choose a training method to see how its Jacobian matrix reads the model’s hidden states. The model’s actual response stays the same.'],
+    ['[data-dialog="training-dialog"]', 'Read about training', 'Open the circled i to read how we trained the selected Jlens method and which prompts we used.'],
     ...(loaded ? [
       ['#view-email', 'Read the input', 'Click View prompt to see the exact prompt, its dataset label, and its source.'],
       ['#system-prompt', 'Read the instructions', 'Click System prompt to see the instructions the model received for this recording.'],
       ['#comparison-scroll', 'Follow a layer over time', 'Swipe horizontally on your touchpad or touchscreen, or drag with your mouse. The Jlens plot is on the left and the Logit lens plot is on the right. Choose a layer to compare its injection and safe token logits as the response plays.'],
-      ...(!document.querySelector('#compare-levels')?.disabled ? [['#compare-levels', 'Compare the final decisions', 'Compare the five generated labels and both Jlens strategies. The table uses scores immediately before each generated label and reports missing labels separately.']] : []),
+      ...(!document.querySelector('#compare-levels')?.disabled ? [['#compare-levels', 'Compare the final decisions', 'Compare the five generated labels and both Jlens training methods. The table shows scores immediately before each generated label. If the model produced no label, that is shown too.']] : []),
       ['.playback-row', 'Control the replay', 'Pause the response or drag the slider to a token. Press play to continue from that position.'],
       ['#main > .legend', 'Read the colors', 'Blue favors safe and orange favors injection. The number compares the injection token score with the safe token score at the selected response position.'],
       ['#inspect', 'Inspect a layer', 'Click a layer in either stack, or use Inspect layers and Look inside. The detail view shows only the lens you selected. Start Tutorial there for a guide to its blocks.'],

@@ -4,7 +4,7 @@ import { unpackRecording } from './recording-codec.js?v=1';
 import { formatProbability } from './block-labels.js?v=transformer-terms-34';
 import { modelSummary } from './model-copy.js?v=transformer-terms-34';
 import { createFrameLoader } from './frame-loader.js?v=seek-replay-24';
-import { createCoordinateView } from './coordinate-view.js?v=transformer-terms-34';
+import { createCoordinateView } from './coordinate-view.js?v=training-methods-38';
 import { createScene } from './scene.js?v=plot-captions-37';
 
 const ui = Object.fromEntries([...document.querySelectorAll('[id]')].map(element => [element.id, element]));
@@ -25,6 +25,16 @@ const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let levelIndex = null, traceHistory = null;
 let catalog, recording, weights, weightsPromise, frames = [], checkFrame, result, classificationIndex = -1;
 let strategy = 'strategy1', selected = 24, selectedKind = 'jlens', expanded = false, timer = null, requestNumber = 0;
+// Remember which controls the visitor has inspected, including across model pages.
+const inspectedControls = new Set();
+function updateControlHint(element, key, inspected = false) {
+  if (inspected) inspectedControls.add(key);
+  try {
+    if (inspected) localStorage.setItem('jlens-inspected-' + key, 'true');
+    if (localStorage.getItem('jlens-inspected-' + key) === 'true') inspectedControls.add(key);
+  } catch { /* The controls still work when browser storage is unavailable. */ }
+  element.classList.toggle('needs-inspection', !element.disabled && !inspectedControls.has(key));
+}
 let download, coordinates, resumeReplay = false, frameLoader, displayedFrame, frameRequest = 0, playbackRun = 0;
 const recordingCache = new Map();
 const layerPlots = {jlens: createLayerPlot(ui['jlens-plot'], 'jlens', selectPlotLayer, seekPlotToken), logit_lens: createLayerPlot(ui['logit-plot'], 'logit_lens', selectPlotLayer, seekPlotToken)};
@@ -102,6 +112,7 @@ async function openDialog(id) {
   if (id === 'tokens-dialog' && await showClassification() === false) return;
   fitDialog(ui[id]);
   ui[id].showModal();
+  if (id === 'training-dialog') updateControlHint(ui['training-info'], strategy, true);
 }
 function closeDialog(dialog) {
   if (!dialog.open || dialog.classList.contains('closing')) return;
@@ -316,13 +327,13 @@ function promptWording(text) {
 function showStrategy() {
   if (!catalog) return;
   const training = catalog.strategies.find(row => row.id === strategy);
-  ui['strategy-title'].textContent = `${training.name}: ${promptWording(training.prompt_format)}`;
+  ui['strategy-title'].textContent = 'Jlens training method ' + strategy.slice(-1);
   ui['strategy-description'].textContent = training.id === 'strategy1'
-      ? 'Jlens was fitted on 100 short prompts, balanced between injection and safe, without an added classification instruction. Fitting the lens does not change the language model’s weights.'
-      : 'Short prompt excerpts are wrapped in a classification instruction, with a label cue at the end. Jlens is fitted to the model’s internal states for these prompts. The language model’s weights are unchanged.';
-  ui['strategy-caveat'].textContent = '';
-  ui['strategy-caveat'].hidden = true;
+      ? 'We trained Jlens on 100 short prompts from LLMail, with equal numbers of injection and safe examples. The model reads each prompt without an extra instruction to classify it. We use its hidden states, the vectors it computes as it reads, to fit the Jacobian matrices. The model’s own weights stay unchanged.'
+      : 'We take short excerpts from synthetic office scenario prompts and ask the model to classify each one as injection or safe. Each prompt ends with a cue for that label. We then use the model’s hidden states to fit the Jlens Jacobian matrices. This lets us test whether asking for a label makes injection and safe easier to read from earlier layers. The model’s own weights stay unchanged.';
   ui['training-source'].textContent = training.id === 'strategy2' ? 'Training data: synthetic office scenario emails.' : `Training data: ${sourceName(training.dataset)}.`;
+  ui['training-info'].setAttribute('aria-label', 'About Jlens training method ' + strategy.slice(-1));
+  updateControlHint(ui['training-info'], strategy);
   showFrame(Number(ui.step.value));
   showHistory();
 }
@@ -526,6 +537,11 @@ async function changeSystemLevel() {
   } finally { ui['system-level'].disabled = false; }
 }
 ui['system-level'].onchange = changeSystemLevel;
+ui['system-level'].addEventListener('pointerdown', () => updateControlHint(ui['system-level'], 'prompt-level', true));
+ui['system-level'].addEventListener('keydown', event => {
+  if (['Enter', ' ', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) updateControlHint(ui['system-level'], 'prompt-level', true);
+});
+ui['system-level'].addEventListener('change', () => updateControlHint(ui['system-level'], 'prompt-level', true));
 ui.example.onchange = () => { loadExample(); updateLevelTable(); };
 document.querySelectorAll('[name="strategy"]').forEach(input => { input.onchange = () => { strategy = input.value; showStrategy(); }; });
 ui.layer.onchange = () => { selected = Number(ui.layer.value); showFrame(Number(ui.step.value)); showHistory(); if (expanded) selectLayer(selected, selectedKind, false); };
@@ -557,6 +573,7 @@ if (hasRecordings) {
   }
   catalog = await readCatalog();
   ui['system-level'].disabled = !levelIndex;
+  updateControlHint(ui['system-level'], 'prompt-level');
   const summary = modelSummary(activeModel);
   ui.architecture.replaceChildren(Object.assign(document.createElement('summary'), {textContent: 'Model architecture'}), ...[summary.architecture, summary.attention, summary.normalization, summary.scaling, summary.vocabulary, summary.layers].map(text => Object.assign(document.createElement('p'), {textContent: text})));
   populatePrompts();

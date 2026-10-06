@@ -294,7 +294,7 @@ export function createCoordinateView(host, onClose) {
     info('close').textContent = `Back to Layer ${options.layer} structure`;
     context = options; previousFocus = document.activeElement; opened = true; host.hidden = false;
     document.body.classList.add('coordinate-open'); document.querySelector('header').inert = true; document.querySelector('#main').inert = true;
-    info('title').textContent = `${options.method === 'jlens' ? 'Jlens' : 'Logit lens'} · Layer ${options.layer}${options.method === 'jlens' ? ' · Strategy ' + options.strategy.slice(-1) : ''}`;
+    info('title').textContent = `${options.method === 'jlens' ? 'Jlens' : 'Logit lens'} · Layer ${options.layer}${options.method === 'jlens' ? ' · Jlens training method ' + options.strategy.slice(-1) : ''}`;
     blocks = options.stages.filter(stage => !stage.group.userData.method || stage.group.userData.method === options.method).map(stage => {
       stage.box.geometry.computeBoundingBox(); const size = stage.box.geometry.boundingBox.getSize(new THREE.Vector3());
       const restore = {parent:stage.group.parent, position:stage.group.position.clone(), scale:stage.group.scale.clone(), rotation:stage.group.rotation.clone(), tutorialBounds:stage.title.tutorialBounds, labels:[], materials:[]};
