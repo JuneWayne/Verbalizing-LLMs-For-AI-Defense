@@ -73,31 +73,35 @@ export function createLayerPlot(host, method, onLayer, onToken) {
     const plotWidth = Math.max(480, svg.clientWidth);
     const plotHeight = Math.max(230, svg.clientHeight / Math.max(1, svg.clientWidth) * plotWidth);
     svg.setAttribute('viewBox', `0 0 ${plotWidth} ${plotHeight}`);
-    const center = (34 + plotHeight - 74) / 2;
+    const center = (12 + plotHeight - 44) / 2;
     const x = token => 76 + (token - 1) / Math.max(1, tokenCount - 1) * (plotWidth - 120);
-    const y = value => 34 + (maximum - value) / (maximum - minimum) * (plotHeight - 108);
+    const y = value => 12 + (maximum - value) / (maximum - minimum) * (plotHeight - 56);
     for (const value of [minimum, (minimum + maximum) / 2, maximum]) {
       add('line', {x1: 76, x2: plotWidth - 44, y1: y(value), y2: y(value), class: value === 0 ? 'plot-zero' : 'plot-grid'});
       add('text', {x: 66, y: y(value) + 5, 'text-anchor': 'end', class: 'plot-tick'}, Number(value.toPrecision(3)).toString());
     }
     const ticks = [...new Set([1, Math.max(1, Math.round(tokenCount / 2)), Math.max(1, tokenCount)])];
-    ticks.forEach(token => add('text', {x: x(token), y: plotHeight - 48, 'text-anchor': 'middle', class: 'plot-tick'}, String(token)));
-    add('text', {x: (plotWidth + 32) / 2, y: plotHeight - 14, 'text-anchor': 'middle', class: 'plot-axis'}, 'Response token');
+    ticks.forEach(token => add('text', {x: x(token), y: plotHeight - 25, 'text-anchor': 'middle', class: 'plot-tick'}, String(token)));
+    add('text', {x: (plotWidth + 32) / 2, y: plotHeight - 4, 'text-anchor': 'middle', class: 'plot-axis'}, 'Response token');
     add('text', {x: 19, y: center, transform: `rotate(-90 19 ${center})`, 'text-anchor': 'middle', class: 'plot-axis'}, 'Token logit');
     if (!frame) return;
     const rows = method === 'jlens' ? frame.jlens[strategy] : frame.logit_lens;
     for (const label of ['injection', 'safe']) {
-      let connected = false;
-      const path = data.map(row => {
-        if (!Number.isFinite(row[label])) { connected = false; return ''; }
+      let connected = false, path = '', fullPath = '';
+      // The full saved response stays visible; playback brightens the portion already read.
+      for (const row of all) {
+        if (!Number.isFinite(row[label])) { connected = false; continue; }
         const command = `${connected ? 'L' : 'M'}${x(row.step)},${y(row[label])}`;
-        connected = true; return command;
-      }).join(' ');
+        fullPath += command + ' ';
+        if (row.step <= frame.step) path += command + ' ';
+        connected = true;
+      }
+      add('path', {d: fullPath, class: `plot-full-history plot-${label}`, 'data-label': label, 'data-token-count': all.length});
       add('path', {d: path, class: `plot-line plot-${label}`, 'data-label': label});
       const value = rows[selected].label_logits[label];
       if (Number.isFinite(value)) add('circle', {cx: x(frame.step), cy: y(value), r: 4, class: `plot-current plot-${label}`});
     }
-    add('line', {x1: x(frame.step), x2: x(frame.step), y1: 34, y2: plotHeight - 74, class: 'plot-cursor'});
+    add('line', {x1: x(frame.step), x2: x(frame.step), y1: 12, y2: plotHeight - 44, class: 'plot-cursor'});
     const scores = rows[selected].label_logits;
     caption.textContent = plotCaption(layers[selected], method, scores.injection, scores.safe);
     // Separate nearby labels while keeping a connector to each exact score.
@@ -108,7 +112,7 @@ export function createLayerPlot(host, method, onLayer, onToken) {
       ends[0].position = middle - 14; ends[1].position = middle + 14;
     }
     for (const end of ends) {
-      const labelY = Math.max(18, Math.min(plotHeight - 80, end.position));
+      const labelY = Math.max(18, Math.min(plotHeight - 50, end.position));
       const text = add('text', {y: labelY + 4, class: `plot-end-label plot-${end.label}`, 'data-label': end.label}, `${end.label} · ${scoreText(scores[end.label])}`);
       const width = text.getComputedTextLength();
       const labelX = x(frame.step) + width + 20 <= plotWidth - 8 ? x(frame.step) + 12 : x(frame.step) - width - 12;
