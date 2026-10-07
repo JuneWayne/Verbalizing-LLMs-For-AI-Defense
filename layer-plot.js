@@ -29,7 +29,7 @@ export function plotCaption(layer, method, injection, safe) {
 
 export function createLayerPlot(host, method, onLayer, onToken) {
   const title = method === 'jlens' ? 'Jlens verbalization' : 'Logit lens verbalization';
-  host.innerHTML = `<h2>${title}</h2><label class="plot-layer-control">Layer <select aria-label="${title} plot layer"></select></label>
+  host.innerHTML = `<h2>${title} <button class="plot-info" data-dialog="logits-dialog" aria-label="How to read ${title} logits" aria-haspopup="dialog" aria-controls="logits-dialog" title="Why higher logits mean higher probabilities"><span aria-hidden="true">i</span></button></h2><label class="plot-layer-control">Layer <select aria-label="${title} plot layer"></select></label>
     <svg viewBox="0 0 480 380" role="img" aria-label="Token logits"></svg>
     <p class="plot-caption">Choose a prompt to start</p>`;
   const svg = host.querySelector('svg'), caption = host.querySelector('.plot-caption'), select = host.querySelector('select');

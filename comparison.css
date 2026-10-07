@@ -6,6 +6,8 @@ body:not(.view-detail) #scene canvas { touch-action: pan-x pan-y pinch-zoom !imp
 #comparison-track #scene { position: relative; inset: auto; width: var(--stack-scene-width, var(--comparison-width)); height: 100%; min-height: 180px; }
 .layer-plot { padding: 0 12px; align-self: stretch; max-height: 100%; overflow-y: auto; }
 .layer-plot h2 { text-align: start; align-self: center; }
+.plot-info { display: inline-grid; place-items: center; vertical-align: middle; width: 36px; min-height: 36px; padding: 6px; border: 0; background: transparent; }
+.plot-info span { display: grid; place-items: center; width: 20px; height: 20px; border: 1.5px solid currentColor; border-radius: 50%; font: 600 14px Georgia, serif; }
 .layer-plot svg { width: 100%; min-width: 280px; display: block; overflow: visible; direction: ltr; }
 .layer-plot p { font-size: 13px; text-align: center; margin-block: 4px 0; }
 .plot-caption { min-height: 1lh; }
