@@ -87,16 +87,14 @@ export function createLayerPlot(host, method, onLayer, onToken) {
     if (!frame) return;
     const rows = method === 'jlens' ? frame.jlens[strategy] : frame.logit_lens;
     for (const label of ['injection', 'safe']) {
-      let connected = false, path = '', fullPath = '';
-      // The full saved response stays visible; playback brightens the portion already read.
-      for (const row of all) {
+      let connected = false, path = '';
+      // Reveal only the tokens reached by playback, including after seeking backward.
+      for (const row of data) {
         if (!Number.isFinite(row[label])) { connected = false; continue; }
         const command = `${connected ? 'L' : 'M'}${x(row.step)},${y(row[label])}`;
-        fullPath += command + ' ';
-        if (row.step <= frame.step) path += command + ' ';
+        path += command + ' ';
         connected = true;
       }
-      add('path', {d: fullPath, class: `plot-full-history plot-${label}`, 'data-label': label, 'data-token-count': all.length});
       add('path', {d: path, class: `plot-line plot-${label}`, 'data-label': label});
       const value = rows[selected].label_logits[label];
       if (Number.isFinite(value)) add('circle', {cx: x(frame.step), cy: y(value), r: 4, class: `plot-current plot-${label}`});

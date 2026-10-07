@@ -1,4 +1,4 @@
-import { createLayerPlot } from './layer-plot.js?v=full-plots-40';
+import { createLayerPlot } from './layer-plot.js?v=progressive-plots-42';
 import { connectPanelGestures } from './panel-gestures.js?v=1';
 import { unpackRecording } from './recording-codec.js?v=1';
 import { formatProbability } from './block-labels.js?v=transformer-terms-34';
