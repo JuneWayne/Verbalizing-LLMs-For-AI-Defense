@@ -5,7 +5,7 @@ import { formatProbability } from './block-labels.js?v=transformer-terms-34';
 import { modelSummary } from './model-copy.js?v=transformer-terms-34';
 import { createFrameLoader } from './frame-loader.js?v=seek-replay-24';
 import { createCoordinateView } from './coordinate-view.js?v=training-methods-38';
-import { createScene } from './scene.js?v=plot-captions-37';
+import { createScene } from './scene.js?v=close-plots-41';
 
 const ui = Object.fromEntries([...document.querySelectorAll('[id]')].map(element => [element.id, element]));
 const modelResponse = await fetch('./models.json', {cache: 'no-store'});
@@ -47,14 +47,14 @@ function seekPlotToken(index) { stopReplay(); showFrame(Math.min(index, Number(u
 function showPlotPanel(panel, smooth = true) {
   plotPanel = panel;
   const viewport = ui['comparison-scroll'];
-  const left = panel === 'jlens' ? 0 : panel === 'stacks' ? ui.scene.offsetLeft : viewport.scrollWidth - viewport.clientWidth;
+  const left = panel === 'jlens' ? 0 : panel === 'stacks' ? ui.scene.offsetLeft - (viewport.clientWidth - ui.scene.clientWidth) / 2 : viewport.scrollWidth - viewport.clientWidth;
   viewport.scrollTo({left, behavior: smooth && !reducedMotion.matches ? 'smooth' : 'instant'});
 }
 // Remember the current area without snapping after a swipe or drag.
 ui['comparison-scroll'].addEventListener('scrollend', () => {
   if (expanded) return;
   const viewport = ui['comparison-scroll'];
-  const positions = [['jlens', 0], ['stacks', ui.scene.offsetLeft], ['logit_lens', viewport.scrollWidth - viewport.clientWidth]];
+  const positions = [['jlens', 0], ['stacks', ui.scene.offsetLeft - (viewport.clientWidth - ui.scene.clientWidth) / 2], ['logit_lens', viewport.scrollWidth - viewport.clientWidth]];
   plotPanel = positions.sort((a, b) => Math.abs(viewport.scrollLeft - a[1]) - Math.abs(viewport.scrollLeft - b[1]))[0][0];
 });
 connectPanelGestures(ui['comparison-scroll'], () => expanded);
@@ -90,7 +90,11 @@ function layoutScene() {
   document.documentElement.style.setProperty('--scene-left', narrow ? '0px' : (actions.offsetLeft + actions.offsetWidth + 16) + 'px');
 }
 const comparisonObserver = new ResizeObserver(() => {
-  ui['comparison-scroll'].style.setProperty('--comparison-width', ui['comparison-scroll'].clientWidth + 'px');
+  const viewport = ui['comparison-scroll'];
+  viewport.style.setProperty('--comparison-width', viewport.clientWidth + 'px');
+  // Fit the canvas to the stacks instead of leaving empty space beside them.
+  const stackWidth = Math.min(viewport.clientWidth, Math.max(580, (viewport.clientHeight - 65) * 41.6 / 24));
+  viewport.style.setProperty('--stack-scene-width', stackWidth + 'px');
   showPlotPanel(plotPanel, false);
 });
 comparisonObserver.observe(ui['comparison-scroll']);

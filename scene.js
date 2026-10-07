@@ -395,10 +395,11 @@ export function createScene(container, onLayer, onNumber, layerCount = 39) {
     const usableHeight = Math.max(100, height - 65);
     layoutCalculation();
     const compact = detail && width < 700;
-    const halfHeight = detail ? (compact ? Math.max(18 * height / usableHeight, 13 * height / width) : Math.max(12.5 * height / usableHeight, 17.5 * height / width)) : width < 900 ? Math.max(11 * height / usableHeight, 14 * height / width) : Math.max(12 * height / usableHeight, 22 * height / width);
-    stackWidth = width < 900 ? .65 : 1.05;
+    const narrowOverview = container.closest('#comparison-scroll').clientWidth < 900;
+    const halfHeight = detail ? (compact ? Math.max(18 * height / usableHeight, 13 * height / width) : Math.max(12.5 * height / usableHeight, 17.5 * height / width)) : narrowOverview ? Math.max(11 * height / usableHeight, 13.6 * height / width) : Math.max(12 * height / usableHeight, 20.8 * height / width);
+    stackWidth = narrowOverview ? .65 : 1.05;
     stackHeight = Math.min(usableHeight - 35, 860) / (20 * height / (2 * halfHeight));
-    for (const plate of plates) plate.userData.word.object3D.position.x = (plate.userData.kind === 'jlens' ? 1 : -1) * (width < 900 ? 10.2 : 7.8);
+    for (const plate of plates) plate.userData.word.object3D.position.x = (plate.userData.kind === 'jlens' ? 1 : -1) * (narrowOverview ? 10.2 : 7.8);
     Object.assign(camera, { top: halfHeight, bottom: -halfHeight, left: -halfHeight * width / height, right: halfHeight * width / height });
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);

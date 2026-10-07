@@ -2,8 +2,8 @@
 #comparison-scroll { position: fixed; inset: var(--scene-top, 140px) 0 var(--scene-bottom, 140px) var(--scene-left, 172px); overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-color: #a8b9d1 transparent; cursor: grab; touch-action: pan-x pan-y pinch-zoom; }
 #comparison-scroll.dragging { cursor: grabbing; user-select: none; }
 body:not(.view-detail) #scene canvas { touch-action: pan-x pan-y pinch-zoom !important; }
-#comparison-track { display: grid; grid-template-columns: repeat(3, var(--comparison-width)); min-height: 100%; width: max-content; align-items: stretch; }
-#comparison-track #scene { position: relative; inset: auto; width: var(--comparison-width); height: 100%; min-height: 180px; }
+#comparison-track { display: grid; grid-template-columns: var(--comparison-width) var(--stack-scene-width, var(--comparison-width)) var(--comparison-width); min-height: 100%; width: max-content; align-items: stretch; }
+#comparison-track #scene { position: relative; inset: auto; width: var(--stack-scene-width, var(--comparison-width)); height: 100%; min-height: 180px; }
 .layer-plot { padding: 0 12px; align-self: stretch; max-height: 100%; overflow-y: auto; }
 .layer-plot h2 { text-align: start; align-self: center; }
 .layer-plot svg { width: 100%; min-width: 280px; display: block; overflow: visible; direction: ltr; }
@@ -22,6 +22,7 @@ body:not(.view-detail) #scene canvas { touch-action: pan-x pan-y pinch-zoom !imp
 .plot-line.plot-safe, .plot-full-history.plot-safe { stroke-dasharray: 6 3; }
 .view-detail .layer-plot { display: none; }
 .view-detail #comparison-track { display: block; width: 100%; height: 100%; }
+.view-detail #comparison-track #scene { width: var(--comparison-width); }
 .view-detail #comparison-scroll { overflow: hidden; }
 @media (max-width: 44rem) {
   .layer-plot { display: grid; grid-template-columns: 1fr auto; align-content: start; }
