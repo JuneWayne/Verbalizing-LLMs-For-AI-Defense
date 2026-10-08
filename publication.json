@@ -50,6 +50,6 @@
     "bipia-15"
   ],
   "selection": "Same complete prompts for every model and system-prompt level; no selection by outcome.",
-  "asset_bytes": 779382248,
+  "asset_bytes": 779382370,
   "number_storage": "Lossless IEEE 754 doubles; no token, layer, score, or recorded numerical value removed."
 }
