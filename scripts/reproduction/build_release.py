@@ -1,7 +1,7 @@
 """Build a GitHub upload ZIP with readable notebooks and the code they use
 
-Public copies omit source-prompt outputs and attachments, while local notebooks stay unchanged
-The evaluation notebook keeps its public aggregate tables and chart
+Public copies retain executed outputs, including tables, examples and plots
+Hidden attachments and widget metadata are removed from the copies
 README contains the notebook order, reproduction instructions and script explanations
 An optional weights package includes the two trained Jlens checkpoints
 Datasets, base model weights, adapters, training approvals and personal execution files stay outside the ZIP
@@ -16,7 +16,6 @@ import zipfile
 
 
 ROOT = Path(__file__).resolve().parents[2]
-PUBLIC_RESULTS_NOTEBOOK = 'notebooks/evaluation/evaluate_defenses.ipynb'
 PUBLIC_LENSES = (
     'model/artifacts/qwen2.5-7b/llmail-v1/lens.pt',
     'model/artifacts/qwen2.5-7b/old-classifier-titlecase-v1/lens.pt',
@@ -73,14 +72,12 @@ def script_dependencies(paths):
 
 
 def public_notebook(path):
-    """Keep instructions and code while removing displayed prompts and hidden attachments"""
+    """Keep executed outputs while removing hidden attachments and widget metadata"""
     notebook = json.loads(path.read_text())
     for cell in notebook['cells']:
         cell.pop('attachments', None)
-        if cell['cell_type'] == 'code' and path.relative_to(ROOT).as_posix() != PUBLIC_RESULTS_NOTEBOOK:
-            cell['outputs'] = []
-            cell['execution_count'] = None
-        # keep folding settings without exporting widget state or execution metadata
+        # Preserve tables, prompt examples, plots and execution counts in every notebook
+        # Keep folding settings without exporting widget state or execution timestamps
         cell['metadata'] = {key: value for key, value in cell.get('metadata', {}).items() if key in ['jp-MarkdownHeadingCollapsed', 'tags']}
     notebook['metadata'] = {key: value for key, value in notebook.get('metadata', {}).items() if key in ['kernelspec', 'language_info']}
     return (json.dumps(notebook, indent=1, ensure_ascii=False) + '\n').encode()
@@ -120,7 +117,7 @@ def build(destination, include_lenses=False):
                 data = (json.dumps(config, indent=2) + '\n').encode()
         contents[name] = data
 
-    manifest = {'purpose': 'Research release with private notebook outputs removed', 'files': {name: hashlib.sha256(data).hexdigest() for name, data in contents.items()}, 'included_lenses': list(PUBLIC_LENSES) if include_lenses else [], 'excluded': ['source datasets', 'base model weights and adapters', 'private notebook outputs', 'training approval records', 'cloud account runners', 'personal HPC jobs']}
+    manifest = {'purpose': 'Research release with executed notebook outputs', 'files': {name: hashlib.sha256(data).hexdigest() for name, data in contents.items()}, 'included_lenses': list(PUBLIC_LENSES) if include_lenses else [], 'excluded': ['source datasets', 'base model weights and adapters', 'notebook attachments and widget state', 'training approval records', 'cloud account runners', 'personal HPC jobs']}
     if include_lenses:
         # Include only these two approved lens files, never the rest of the model folder
         # Hash each file in chunks so the large matrices do not fill system memory

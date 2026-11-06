@@ -54,13 +54,15 @@ def check(path):
             headings = set()
             for cell in notebook['cells']:
                 source = ''.join(cell['source'])
-                public_results = name == 'notebooks/evaluation/evaluate_defenses.ipynb'
-                if cell.get('attachments') or (not public_results and (cell.get('outputs') or cell.get('execution_count') is not None)):
-                    raise ValueError(f'Notebook contains private outputs or attachments: {name}')
+                if cell.get('attachments'):
+                    raise ValueError(f'Notebook contains hidden attachments: {name}')
                 if any(output.get('output_type') == 'error' for output in cell.get('outputs', [])):
                     raise ValueError(f'Notebook contains an execution error: {name}')
                 if cell['cell_type'] == 'code':
                     ast.parse(source)
+                    # Every code section must have run, including sections that only import packages
+                    if not isinstance(cell.get('execution_count'), int) or cell['execution_count'] < 1:
+                        raise ValueError(f'Notebook contains an unexecuted code section: {name}')
                 if source.startswith('## '):
                     headings.add(source.splitlines()[0][3:].replace(' ', '-'))
             links = set(re.findall(r'\]\(#([^)]*)\)', ''.join(notebook['cells'][0]['source'])))
@@ -72,6 +74,12 @@ def check(path):
             checksum = hashlib.sha256(json.dumps(source, sort_keys=True).encode()).hexdigest()
             if record['status'] != 'passed' or checksum != record['source_sha256']:
                 raise ValueError(f'Notebook execution record is missing or outdated: {name}')
+            # Match the published tables and figures to the outputs from the successful run
+            # This catches cleared or edited outputs even when the source code stays the same
+            outputs = [{'execution_count': cell.get('execution_count'), 'outputs': cell.get('outputs', [])} for cell in notebook['cells'] if cell['cell_type'] == 'code']
+            checksum = hashlib.sha256(json.dumps(outputs, sort_keys=True).encode()).hexdigest()
+            if checksum != record.get('execution_sha256') or not any(cell['outputs'] for cell in outputs):
+                raise ValueError(f'Notebook outputs are missing or differ from its execution record: {name}')
         return {'notebooks_checked': notebooks, 'files_checked': len(manifest['files']), 'lenses_checked': len(lenses), 'model_computation': False}
 
 
