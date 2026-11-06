@@ -48,7 +48,7 @@ To repeat response generation and training, download the following data and mode
 | [FIPI dataset](https://github.com/zjuynzhong/ynzhong_Rennervate_NDSS26) | `data/FIPI/raw/train_100000.json` and `test_10000.json` |
 | [Qwen2.5-7B-Instruct](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct) | `model/Qwen2.5-7B-Instruct/` |
 
-I also include both trained Jlens versions for Qwen2.5-7B-Instruct in the weights release package, one fitted on LLMail prompts and another on synthetic office prompts.
+I also include both trained Jlens versions for Qwen2.5-7B-Instruct in the [weights release package](https://github.com/JuneWayne/Verbalizing-LLMs-For-AI-Defense/releases/download/jlens-qwen25-7b-v1/jlens-qwen25-7b-weights.zip), one fitted on LLMail prompts and another on synthetic office prompts.
 Extract the package into the main project folder, using the paths in [lens_settings.json](scripts/reproduction/lens_settings.json), while the base model weights, LoRA adapters and recorded responses remain separate from this release.
 
 I will not be open-sourcing the synthetic office prompt dataset due to privacy concerns, although the released Jlens can still be used on other prompts. Meaning, the fitted lens is provided, but retraining it on the same synthetic prompts or repeating the synthetic dataset benchmark requires the private data.
