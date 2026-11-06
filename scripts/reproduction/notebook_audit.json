@@ -1,0 +1,136 @@
+{
+  "date": "2026-11-05",
+  "model_generation": false,
+  "training": false,
+  "execution": "Code cells executed sequentially with IPython after script renaming, using existing records; notebook format validated separately",
+  "public_outputs": "Only the aggregate evaluation notebook retains outputs",
+  "original_notebook_outputs": "Preserved unchanged; validation captured outputs in memory",
+  "notebooks": [
+    {
+      "notebook": "notebooks/curation/collect_fipi_responses.ipynb",
+      "source_sha256": "38a8a9a0cb0f27b6037984e0720470fabac2a913455b3d6ebf248e814ed72021",
+      "status": "passed",
+      "code_cells": 4,
+      "seconds": 2.55,
+      "comment_lines": 7,
+      "sections_with_descriptions": 4
+    },
+    {
+      "notebook": "notebooks/curation/compare_selections.ipynb",
+      "source_sha256": "119b4e9afff7d240a1c0a2ed6204e6caeb436cedc99388a764710269219b8051",
+      "status": "passed",
+      "code_cells": 4,
+      "seconds": 0.19,
+      "comment_lines": 5,
+      "sections_with_descriptions": 4
+    },
+    {
+      "notebook": "notebooks/curation/fit_jlens.ipynb",
+      "source_sha256": "a063cfbf656ffdfb0993e0c3130d6c759400c6a0e51d16656e2483b5e6a285d9",
+      "status": "passed",
+      "code_cells": 4,
+      "seconds": 0.03,
+      "comment_lines": 4,
+      "sections_with_descriptions": 4
+    },
+    {
+      "notebook": "notebooks/curation/select_jlens.ipynb",
+      "source_sha256": "f42ea3528e1fdf5f833ee40ce07f47c1a280d96195560470a969a0338c9d3460",
+      "status": "passed",
+      "code_cells": 4,
+      "seconds": 1.15,
+      "comment_lines": 9,
+      "sections_with_descriptions": 4
+    },
+    {
+      "notebook": "notebooks/curation/select_linear_svm.ipynb",
+      "source_sha256": "b1cf67f560a34d9a0c1c4a963b64734a9eba8a6d01884b890134a756bb856809",
+      "status": "passed",
+      "code_cells": 4,
+      "seconds": 0.28,
+      "comment_lines": 9,
+      "sections_with_descriptions": 4
+    },
+    {
+      "notebook": "notebooks/curation/select_logistic_regression.ipynb",
+      "source_sha256": "f75bbd5616b68a4effffd2bc64eeb25d4092c5cf704af059932344d198d5bdff",
+      "status": "passed",
+      "code_cells": 4,
+      "seconds": 0.24,
+      "comment_lines": 9,
+      "sections_with_descriptions": 4
+    },
+    {
+      "notebook": "notebooks/curation/select_model_failures.ipynb",
+      "source_sha256": "cfc9fc43da44c82e4c578c21ae6a2c7fc754b7ada7dc8149cd210ee9bcbae702",
+      "status": "passed",
+      "code_cells": 3,
+      "seconds": 0.03,
+      "comment_lines": 5,
+      "sections_with_descriptions": 3
+    },
+    {
+      "notebook": "notebooks/curation/select_neural_network.ipynb",
+      "source_sha256": "049583ab843fb75396f2237eea4035e11b035918397b38beba785ec7687bfb81",
+      "status": "passed",
+      "code_cells": 4,
+      "seconds": 0.25,
+      "comment_lines": 9,
+      "sections_with_descriptions": 4
+    },
+    {
+      "notebook": "notebooks/curation/select_random.ipynb",
+      "source_sha256": "a9b25bf8a0e8167310273eb1d804622da92104ca6d63e77358b8e007c7140959",
+      "status": "passed",
+      "code_cells": 3,
+      "seconds": 0.03,
+      "comment_lines": 5,
+      "sections_with_descriptions": 3
+    },
+    {
+      "notebook": "notebooks/curation/select_text_diversity.ipynb",
+      "source_sha256": "20076f84b733e3e9fa7a5e0388248afe5ca310147d68bb3f1ed21aa23d3ce572",
+      "status": "passed",
+      "code_cells": 3,
+      "seconds": 0.03,
+      "comment_lines": 5,
+      "sections_with_descriptions": 3
+    },
+    {
+      "notebook": "notebooks/curation/train_lora.ipynb",
+      "source_sha256": "0e03c5f2dd9a1f19dd0cf0cfde68c85690b2e53539b764ea44c31e7acacbf980",
+      "status": "passed",
+      "code_cells": 4,
+      "seconds": 27.38,
+      "comment_lines": 7,
+      "sections_with_descriptions": 4
+    },
+    {
+      "notebook": "notebooks/data/inspect_fipi.ipynb",
+      "source_sha256": "a25778ff1e2c531fde8643506ad45970c68fecde7d9cc89409b90bde181d4474",
+      "status": "passed",
+      "code_cells": 5,
+      "seconds": 134.02,
+      "comment_lines": 21,
+      "sections_with_descriptions": 5
+    },
+    {
+      "notebook": "notebooks/evaluation/evaluate_defenses.ipynb",
+      "source_sha256": "d313d45320b5d871eda50aefd7f8b546c1efe3835ae68ffbc295d6acfc09def0",
+      "status": "passed",
+      "code_cells": 5,
+      "seconds": 0.08,
+      "comment_lines": 6,
+      "sections_with_descriptions": 5
+    },
+    {
+      "notebook": "notebooks/reproduce_workflow.ipynb",
+      "source_sha256": "7fd580ca20c417638e1ad6a65250c749d288fb8e3b9bb94e54ee59176a5bd4a7",
+      "status": "passed",
+      "code_cells": 5,
+      "seconds": 0.03,
+      "comment_lines": 8,
+      "sections_with_descriptions": 5
+    }
+  ]
+}

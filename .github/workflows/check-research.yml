@@ -1,0 +1,21 @@
+name: Check research notebooks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Build public source package
+        run: python -m scripts.reproduction.build_release --output /tmp/research-notebooks.zip
+      - name: Check source, notebook links, and execution records
+        run: python -m scripts.reproduction.check_release /tmp/research-notebooks.zip

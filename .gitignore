@@ -1,0 +1,25 @@
+# Environment and secrets
+.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.ipynb_checkpoints/
+
+# Generated dataset
+/data/
+/slices/
+
+/model/
+/scripts/archive/retired_data_and_checks_*.zip
+
+# Local experiment outputs and exported conversation history
+*.log
+session_transcript.md
+session_transcript.md.zip
+
+# Local archives and personal HPC jobs
+/archive/
+/bash/

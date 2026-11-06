@@ -1,0 +1,33 @@
+[project]
+name = "prompt-injection-modelling"
+version = "0.1.0"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "accelerate>=1.1.0,<2",
+    "jlens",
+    "modal>=1.5.3",
+    "numpy<2",
+    "pyyaml>=6.0",
+    "torch==2.8.0",
+    "transformers==5.15.1",
+]
+
+[tool.uv.sources]
+jlens = { git = "https://github.com/anthropics/jacobian-lens.git", rev = "581d398613e5602a5af361e1c34d3a92ea82ba8e" }
+
+[dependency-groups]
+curation = [
+    "pandas>=2.2,<3",
+    "scikit-learn>=1.5,<2",
+    "peft>=0.18,<0.22",
+]
+notebook = [
+    "ipykernel>=6.29",
+    "jupyterlab>=4.2",
+    "matplotlib>=3.7",
+    "pandas>=2.2,<3",
+]
+
+[tool.pytest.ini_options]
+# archived tests belong to earlier experiments and must not enter current test discovery
+norecursedirs = [".git", ".venv", "archive", "data", "model", "node_modules"]

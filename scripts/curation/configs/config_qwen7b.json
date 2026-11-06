@@ -1,0 +1,44 @@
+{
+  "experiment": "fipi_qwen25_7b_10k_v1",
+  "seed": 42,
+  "model": "model/Qwen2.5-7B-Instruct",
+  "training_data": "data/FIPI/raw/train_100000.json",
+  "testing_data": "data/FIPI/raw/test_10000.json",
+  "output": "model/artifacts/curation/fipi_qwen25_7b_10k_v1",
+  "pool_mode": "sample_remaining_variants",
+  "selector_training_pairs": 1500,
+  "validation_pairs": 500,
+  "lora_validation_pairs": 100,
+  "candidate_pairs": 10000,
+  "testing_pairs": 10000,
+  "evaluation_pairs": 200,
+  "evaluation_max_new_tokens": 1024,
+  "selected_pairs": 256,
+  "batch_size": 8,
+  "generation_batch_size": 8,
+  "max_input_tokens": 4096,
+  "max_new_tokens": 2048,
+  "system_prompt": "You are a helpful assistant. Complete the user’s task using the provided information and follow the requested response format.",
+  "lenses": {
+    "jlens_llmail": {
+      "path": "model/artifacts/qwen2.5-7b/llmail-v1/lens.pt",
+      "dataset": "LLMail",
+      "prompt_format": "raw prompts, maximum 128 tokens",
+      "provenance": "lens.pt.json records 100 fitting prompts and the fitting configuration"
+    },
+    "jlens_synthetic": {
+      "path": "model/artifacts/qwen2.5-7b/old-classifier-titlecase-v1/lens.pt",
+      "dataset": "CAMI, synthetic office scenario prompts",
+      "prompt_format": "preformatted classification prompts from Jlens-windowed-training.csv, maximum 128 tokens",
+      "provenance": "lens.pt.json records 100 fitting prompts and the fitting configuration"
+    }
+  },
+  "lora": {
+    "rank": 16,
+    "alpha": 32,
+    "learning_rate": 0.00005,
+    "epochs": 5,
+    "layers": [10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+    "target_modules": ["q_proj", "v_proj", "up_proj", "down_proj"]
+  }
+}
