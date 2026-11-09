@@ -4,30 +4,32 @@ from pathlib import Path
 import argparse
 import hashlib
 import json
-import time
 
 from transformers import AutoTokenizer
 import pandas as pd
 
-from scripts.curation.common import METHODS, ROOT, digest, messages, read_jsonl, write_json, write_jsonl
-from scripts.curation.training.data_approval import TRAINING_CODE_FILES, approved_inputs
-from scripts.curation.training.training_helpers import check_rows, check_sources, check_splits
+from scripts.curation.common import ROOT, digest, messages, read_jsonl, write_json, write_jsonl
+from scripts.curation.evaluation.evaluate import testing_pairs
+from scripts.curation.training.run_manifest import read_config
+from scripts.curation.training.training_helpers import check_rows, check_sources, check_splits, inspect_data
 
 
-def prepare(config_path, record_approval=False):
-    config = json.loads(config_path.read_text())
+def prepare(config_path):
+    config = read_config(config_path)
     source = ROOT / config['selection_source']
     original = source.parent
     destination = ROOT / config['data']
-    if (destination / 'approval.json').exists():
-        raise FileExistsError('Approved data already exists; preserve the approved version')
+    # Preserve existing prepared pairs instead of replacing a previous experiment
+    # A new data folder can be chosen in the configuration for a separate run
+    if (destination / 'validation.jsonl').exists() or list((destination / 'training').glob('*.jsonl')):
+        raise FileExistsError('Prepared data already exists; use --check-only or choose a new data folder')
     tokenizer = AutoTokenizer.from_pretrained(ROOT / config['model'], local_files_only=True)
     vocabulary = json.loads((ROOT / config['model'] / 'config.json').read_text())['vocab_size']
     groups, review, too_long = {}, [], []
     source_hashes = {}
 
     # prepare all eight selected groups and their shared validation responses
-    for method in [*METHODS, 'validation']:
+    for method in [*config['methods'], 'validation']:
         if method == 'validation':
             token_path = original / 'lora_validation.jsonl'
             original_rows = read_jsonl(ROOT / config['validation_source'])
@@ -48,7 +50,7 @@ def prepare(config_path, record_approval=False):
         for old in read_jsonl(token_path):
             prompt = originals[old['pair_id']]
 
-            # verify that the original tokens used the approved neutral system prompt
+            # Verify that the response tokens belong to the configured task and system prompt
             for condition in ('safe', 'injection'):
                 prefix = tokenizer.apply_chat_template(messages(prompt, condition, config), tokenize=True, add_generation_prompt=True, return_dict=False)
                 if prefix != old['prefix_ids'][condition]:
@@ -69,41 +71,42 @@ def prepare(config_path, record_approval=False):
         groups[method] = rows
 
     # compare each training group with the same validation set before exporting prepared inputs
-    for method in METHODS:
+    for method in config['methods']:
         check_splits(groups[method], groups['validation'])
 
-    # draft exports keep every pair and do not truncate overlength responses
+    # Apply token and pair-count checks to every group before writing training inputs
+    # Overlength responses require an explicit setting change rather than silent truncation
+    for method, rows in groups.items():
+        count = config['validation_pairs'] if method == 'validation' else config['training_pairs']
+        check_rows(rows, count, config, tokenizer.eos_token_id, vocabulary)
+
+    # Choose the fixed testing subset before training if it has not been prepared yet
+    # Existing testing records remain unchanged when repeating a run
+    testing_path = ROOT / config['testing_source']
+    if not testing_path.exists():
+        write_jsonl(testing_path, testing_pairs(config['testing_pairs']))
+
+    # Export each complete reference response with its original prompt prefixes
     for method, rows in groups.items():
         path = destination / 'validation.jsonl' if method == 'validation' else destination / 'training' / f'{method}.jsonl'
         write_jsonl(path, rows)
     pd.DataFrame(review).to_csv(destination / 'targets_for_review.csv', index=False)
-    report = {'pair_counts': {method: len(rows) for method, rows in groups.items()}, 'maximum_task_response_tokens': max(row['task_response_tokens'] for row in review), 'overlength_targets': too_long, 'source_hashes': source_hashes, 'training_started': False, 'target_policy': 'Existing safe responses accepted by the user; no independent correctness assessment'}
+    # Recheck prompt tokenization and separation from testing using the exported records
+    inspect_data(config)
+    report = {'pair_counts': {method: len(rows) for method, rows in groups.items()}, 'maximum_task_response_tokens': max(row['task_response_tokens'] for row in review), 'overlength_targets': too_long, 'source_hashes': source_hashes, 'training_started': False, 'target_policy': 'Existing model-generated safe responses; task correctness has not been independently verified'}
     write_json(destination / 'preparation.json', report)
-
-    # ordinary preparation returns the data report without authorizing a training run
-    if not record_approval:
-        return report
-
-    if config['status'] != 'approved':
-        raise ValueError('The exact configuration must be approved before recording authorization')
-    for method, rows in groups.items():
-        count = config['validation_pairs'] if method == 'validation' else config['training_pairs']
-        check_rows(rows, count, config, tokenizer.eos_token_id, vocabulary)
-    required = [destination / 'validation.jsonl', destination / 'targets_for_review.csv', destination / 'preparation.json', ROOT / config['model_hashes'], ROOT / config['validation_source']]
-    required.extend(destination / 'training' / f'{method}.jsonl' for method in METHODS)
-    required.extend(source / method / 'pairs.jsonl' for method in METHODS)
-    required.extend(ROOT / name for name in TRAINING_CODE_FILES)
-    required.append(Path(__file__))
-    required.append(ROOT / 'bash/train_reference_groups.sbatch')
-    approval = {'training_authorized': True, 'targets_accepted': True, 'correctness_independently_verified': False, 'execution': config['execution'], 'authorization': 'User explicitly approved the listed settings, reuse of existing safe responses, upload of model weights, and submission to UVA; then approved raising only the task-response limit to 2048 tokens', 'approved_unix': time.time(), 'config_sha256': digest(config_path), 'input_hashes': {str(path.relative_to(ROOT)): digest(path) for path in required}}
-    write_json(destination / 'approval.json', approval)
-    approved_inputs(config_path, config)
-    return {**report, 'approval_recorded': True}
+    return report
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', type=Path, default=ROOT / 'scripts/curation/configs/config_reference_groups.json')
-    parser.add_argument('--record-approval', action='store_true', help='Record the explicit user approval after all targets pass the approved limits')
+    parser.add_argument('--check-only', action='store_true', help='Check existing prepared pairs without replacing them or training')
     args = parser.parse_args()
-    print(json.dumps(prepare(args.config.resolve(), args.record_approval), indent=2))
+    path = args.config.resolve()
+    if args.check_only:
+        config = read_config(path)
+        groups, validation, testing = inspect_data(config)
+        print(json.dumps({'pair_counts': {method: len(rows) for method, rows in groups.items()}, 'validation_pairs': len(validation), 'testing_pairs': len(testing), 'training_started': False}, indent=2))
+    else:
+        print(json.dumps(prepare(path), indent=2))

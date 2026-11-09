@@ -4,6 +4,7 @@ The injection prompt is the input and its paired safe response is the target ans
 Validation loss chooses the trained checkpoint before the fixed FIPI testing set is evaluated
 """
 
+from pathlib import Path
 import argparse
 import gc
 import json
@@ -14,9 +15,9 @@ from peft import LoraConfig, get_peft_model, set_peft_model_state_dict
 from peft.utils.save_and_load import load_peft_weights
 import torch
 
-from scripts.curation.common import ROOT, digest, load_model, write_json
+from scripts.curation.common import METHODS, ROOT, digest, load_model, write_json
 from scripts.curation.evaluation.evaluate_fipi import evaluate
-from scripts.curation.training.approved_training_runs import verify
+from scripts.curation.training.run_manifest import read_config, record_manifest
 from scripts.curation.training.reference_loss import task_response_loss
 from scripts.curation.training.training_helpers import epoch_order, inspect_data, learning_rate
 
@@ -156,15 +157,42 @@ def train(config_path, config, method, training, validation, testing):
         write_json(folder / 'training_run.json', run)
 
 
-if __name__ == '__main__':
+# Run the same Python entry point on a workstation, cloud GPU or cluster
+# The check-only option validates inputs and returns before any GPU model is loaded
+def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--method-index', type=int, choices=range(8), required=True)
+    parser.add_argument('--config', type=Path, default=ROOT / 'scripts/curation/configs/config_reference_groups.json')
+    method_choice = parser.add_mutually_exclusive_group()
+    method_choice.add_argument('--method', choices=METHODS)
+    method_choice.add_argument('--method-index', type=int, choices=range(8))
+    parser.add_argument('--check-only', action='store_true', help='Validate the prepared data and settings without training or generating responses')
     args = parser.parse_args()
-    path = ROOT / 'scripts/curation/configs/config_reference_groups.json'
-    config = verify(path)
+    if not args.check_only and args.method is None and args.method_index is None:
+        parser.error('Choose --method or --method-index, or use --check-only')
+    path = args.config.resolve()
+    config = read_config(path)
+
+    # All source, token-length and split checks run before a model can be trained
+    # The check-only command also works on a computer without a GPU
     groups, validation, testing = inspect_data(config)
-    torch.set_num_threads(config['cpus'])
+    if args.check_only:
+        print(json.dumps({'methods': list(groups), 'training_pairs_per_method': config['training_pairs'], 'validation_pairs': len(validation), 'testing_pairs': len(testing), 'training_started': False}, indent=2))
+        raise SystemExit(0)
+    method = args.method
+    if method is None:
+        if args.method_index >= len(config['methods']):
+            parser.error('The method index is outside this configuration')
+        method = config['methods'][args.method_index]
+    if method not in groups:
+        parser.error('The selected method is absent from this configuration')
+    torch.set_num_threads(config.get('cpus', 4))
     if not torch.cuda.is_available() or not torch.cuda.is_bf16_supported():
-        raise RuntimeError('The approved run needs a GPU with BF16 support')
-    method = config['methods'][args.method_index]
+        raise RuntimeError('Training needs a CUDA GPU with BF16 support')
+
+    # Create the input record automatically, then train only the requested data group
+    record_manifest(path, config)
     train(path, config, method, groups[method], validation, testing)
+
+
+if __name__ == '__main__':
+    main()

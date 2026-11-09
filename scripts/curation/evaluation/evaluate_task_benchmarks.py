@@ -256,7 +256,7 @@ def run(benchmark, method, smoke=False):
                 raise
         row.update(turns=generator.turns, repetition=any(turn['repetitive_at_limit'] for turn in generator.turns), unfinished=any(not turn['finished'] for turn in generator.turns), elapsed_seconds=time.time() - started)
 
-        # complete each record atomically so interrupted Slurm jobs can resume safely
+        # complete each record atomically so interrupted runs can resume safely
         temporary = folder / f'case_{index:05d}.tmp'
         write_json(temporary, row)
         temporary.replace(folder / f'case_{index:05d}.json')

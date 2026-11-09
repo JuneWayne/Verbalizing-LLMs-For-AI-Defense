@@ -86,7 +86,7 @@ def source_folder(benchmark):
 def prepare(benchmark):
     source = source_folder(benchmark)
     parent = json.loads((source / 'manifest.json').read_text())
-    # the original code remains untouched on HPC, so its data and provenance can still be checked
+    # the original code copy remains unchanged so its data and source can still be checked
     for name, checksum in parent['input_hashes'].items():
         if digest(ROOT / name) != checksum:
             raise ValueError(f'Original frozen input changed: {name}')

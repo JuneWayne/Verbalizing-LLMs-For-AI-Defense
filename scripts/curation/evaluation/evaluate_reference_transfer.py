@@ -70,7 +70,7 @@ def prepare(dataset):
     fixture = 'prompts.jsonl' if dataset == 'llmail' else 'cases.jsonl'
     rows = read_jsonl(original / fixture)
     config = json.loads((ROOT / 'scripts/curation/configs/config_reference_groups.json').read_text())
-    extra_files = [Path(__file__), ROOT / 'bash/evaluate_reference_transfer.sbatch', manifest_file]
+    extra_files = [Path(__file__), manifest_file]
     # test the new selection groups for exact prompt overlap before extending LLMail
     normalize = lambda value: ' '.join(value.casefold().split())
     fitting_text = set()

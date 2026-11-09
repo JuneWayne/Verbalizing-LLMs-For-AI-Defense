@@ -38,7 +38,8 @@ def export_validation():
     if path.exists() and read_jsonl(path) != rows:
         raise ValueError("Existing validation responses differ")
     write_jsonl(path, rows)
-    # validation measures the same fifty-token loss, including prefixes of unfinished responses
+    # Preserve the full recorded responses for reference-response preparation
+    # That stage checks whether each safe answer includes its natural end token
     report = {"fingerprint": experiment_fingerprint(), "pairs": len(rows), "sha256": digest(path), "unfinished_responses": sum(not row["finished"] for row in records), "completion_quality_verified": False, "selection_rule": "first 100 pairs in the fixed seeded validation split, before generation"}
     write_json(path.with_suffix(".json"), report)
     return report

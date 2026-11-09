@@ -30,7 +30,7 @@ ENTRY_POINTS = [
     'scripts/curation/preparation/preparation.py', 'scripts/curation/selection/extract_results.py',
     'scripts/curation/preparation/finalize_training.py', 'scripts/curation/preparation/export_validation.py',
     'scripts/curation/preparation/prepare_lora_groups.py', 'scripts/curation/training/train_reference_groups.py',
-    'scripts/curation/training/approved_training_runs.py',
+    'scripts/curation/training/run_manifest.py',
     'scripts/curation/evaluation/evaluate_llmail_reference.py', 'scripts/curation/evaluation/evaluate_reference_transfer.py',
     'scripts/curation/evaluation/evaluate_synthetic_business.py', 'scripts/curation/evaluation/evaluate_task_benchmarks.py',
     'scripts/curation/evaluation/evaluate_agentlab_reference.py', 'scripts/curation/evaluation/evaluate_bipia_reference.py',

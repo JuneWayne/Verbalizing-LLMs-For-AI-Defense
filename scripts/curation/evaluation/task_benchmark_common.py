@@ -1,4 +1,4 @@
-"""Shared inference and records for HPC-only task evaluations"""
+"""Shared model generation and records for task evaluations"""
 
 from pathlib import Path
 import contextlib
@@ -142,7 +142,7 @@ def freeze_manifest(benchmark, rows, details):
     if commit != COMMITS[benchmark]:
         raise ValueError(f'Unexpected source version for {benchmark}')
     files = [file for file in source.rglob('*') if file.is_file() and '.git' not in file.parts and '__pycache__' not in file.parts]
-    files += [CONFIG, Path(__file__), ROOT / 'scripts/curation/evaluation/evaluate_task_benchmarks.py', ROOT / 'bash/evaluate_task_benchmarks.sbatch']
+    files += [CONFIG, Path(__file__), ROOT / 'scripts/curation/evaluation/evaluate_task_benchmarks.py']
 
     # bind every adapter comparison to the same prepared cases, source version and generation limits
     case_hash = hashlib.sha256(json.dumps(rows, sort_keys=True).encode()).hexdigest()

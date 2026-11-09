@@ -28,7 +28,7 @@ def learning_rate(update, config):
     total = config['training_pairs'] * config['epochs']
     warmup = max(1, math.ceil(total * config['warmup_fraction']))
     if not 1 <= update <= total:
-        raise ValueError('Update lies outside the approved training schedule')
+        raise ValueError('Update lies outside the configured training schedule')
 
     # warmup increases the rate linearly from a small value to the configured peak
     if update <= warmup:
@@ -63,7 +63,7 @@ def check_rows(rows, count, config, eos_id, vocabulary_size):
         # the safe reference must include text followed by the model's natural end token
         target = row['task_response_ids']
         if len(target) < 2 or len(target) > config['max_task_response_tokens'] or target[-1] != eos_id:
-            raise ValueError('Each task response must contain text and its end token, within the approved limit')
+            raise ValueError('Each task response must contain text and its end token, within the configured limit')
         sequences.append(target)
 
         # every token must be an integer index inside the model's vocabulary
@@ -160,5 +160,5 @@ def inspect_data(config):
         for condition in ('safe', 'injection'):
             ids = tokenizer.apply_chat_template(messages(row, condition, config), tokenize=True, add_generation_prompt=True)
             if len(ids) > config['max_input_tokens']:
-                raise ValueError('A testing prompt exceeds the approved input limit')
+                raise ValueError('A testing prompt exceeds the configured input limit')
     return groups, validation, testing

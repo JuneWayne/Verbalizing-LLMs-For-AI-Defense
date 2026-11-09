@@ -1,4 +1,4 @@
-"""HPC-only BIPIA subset with original rule checks and a separate local judge"""
+"""Evaluate the BIPIA subset with published rules and a separate local judge"""
 
 from importlib import import_module
 from pathlib import Path
@@ -74,7 +74,7 @@ def prepare():
                     system, user = builder.construct_prompt(example, require_system_prompt=True)
                     rows.append({'id': f'{task}/{category}-{variant}/{position}', 'task': task, 'condition': 'injection', 'context_index': index, 'category': category, 'attack_name': f'{category}-{variant}', 'position': position, 'ideal': example['ideal'], 'messages': [{'role': 'system', 'content': system}, {'role': 'user', 'content': user}]})
     files = [file for file in SOURCE.rglob('*') if file.is_file() and '.git' not in file.parts and '__pycache__' not in file.parts]
-    files += [Path(__file__), ROOT / 'scripts/curation/evaluation/task_benchmark_common.py', ROOT / 'bash/evaluate_bipia_reference.sbatch', CONFIG]
+    files += [Path(__file__), ROOT / 'scripts/curation/evaluation/task_benchmark_common.py', CONFIG]
     manifest = {'benchmark': 'BIPIA subset with local judge', 'source_commit': commit, 'methods': METHODS, 'cases': len(rows), 'cases_sha256': hashlib.sha256(json.dumps(rows, sort_keys=True).encode()).hexdigest(), 'generation': {'max_new_tokens': 1024, 'max_context_tokens': 32768, 'do_sample': False, 'seed': 42, 'dtype': 'bfloat16'}, 'changes': ['EmailQA, TableQA and CodeQA only; WebQA and Summarization source contexts are not included in this release', 'Every published testing injection at start, middle and end, with one fixed context each; not the complete cross product', 'Original prompts and rule checks; paid GPT judge replaced with frozen base Qwen2.5-7B', 'Rule-check ASR and local-judge ASR are separate; local judgments require human review', 'No generated code executes and no real tools are called', 'Task completion remains unscored because answer similarity is not a verified task-success checker'], 'input_hashes': {str(file.relative_to(ROOT)): digest(file) for file in sorted(files)}}
     DESTINATION.mkdir(parents=True, exist_ok=True)
     if any(DESTINATION.rglob('case_*.json')):
